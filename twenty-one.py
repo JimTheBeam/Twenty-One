@@ -9,7 +9,6 @@ users_card = {}
 
 # get users_card, return summ of the card
 def summ_card(**users_deck):
-    print(users_deck)
     points = 0
     for number in users_deck.values():
         points += (number)
@@ -31,28 +30,31 @@ def del_card_from_deck(*card, **deck):
     return deck
 
 
+def add_user_card(card):
+    users_card[card[0]] = card[1]
+    return users_card
+
+
+
+
+def start(card, **deck):
+    print('Game started \nYou get: ')
+    for i in range(1, 3):
+        card = rand_card(**deck)
+        deck = del_card_from_deck(card, **deck)
+        user_card = add_user_card(card)
+    user_card_view = user_card.keys()
+    print(user_card_view)
+
 
 
 
 card = rand_card(**deck)
-print('рандомная карта:')
-print(card)
-
-deck = del_card_from_deck(card, **deck)
-print('новая колода')
-print(deck)
-    
+#deck = del_card_from_deck(card, **deck)
+#user_card = add_user_card(card)
 
 
-
-# get random card from deck (return dict)
-card = choice(list(deck.items()))
-# delete chosen card from deck
-deck.pop(card[0])
-# add card to users dict
-users_card[card[0]] = card[1]
-
-
+start(card, **deck)
 
 
 

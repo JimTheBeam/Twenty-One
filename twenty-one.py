@@ -12,7 +12,7 @@ def summ_card(**users_deck):
     points = 0
     for number in users_deck.values():
         points += (number)
-    print('summ = ', points)
+    return points
 
 
 # get random card from deck (return dict)
@@ -38,34 +38,72 @@ def add_user_card(card):
 
 
 def start(card, **deck):
-    print('Game started \nYou get: ')
+    
     for i in range(1, 3):
         card = rand_card(**deck)
         deck = del_card_from_deck(card, **deck)
         user_card = add_user_card(card)
-    user_card_view = user_card.keys()
-    print(user_card_view)
+
+    # print user's deck as a list
+    a = []
+    for j in user_card:
+        a.append(j)
+    print(a)
+
+
+def game(card, **deck):
+    newcard = rand_card(**deck)
+    deck = del_card_from_deck(newcard, **deck)
+    user_card = add_user_card(newcard)
+
+    # print user's deck as a list
+    a = []
+    for j in user_card:
+        a.append(j)
+    print(a)
 
 
 
 
-card = rand_card(**deck)
-#deck = del_card_from_deck(card, **deck)
-#user_card = add_user_card(card)
-
-
-start(card, **deck)
-
-
-
-
+def check_win(summ_card):
+    if summ_card == 21:
+        print('Congratulation you win!')
+    elif summ_card > 21:
+        print('You loose')
+    else:
+        print('Want to get one more card?')
 
 
 
+def add_card(**deck):
+    print(deck)
 
-summ_card(**users_card)
 
 
 
-#print('your cards: ', card[0])
-#print('your summ is: ', card[1])
+
+
+if __name__ == '__main__':
+
+    print('Game started \nYou get: ')
+
+    card = rand_card(**deck)
+    start(card, **deck)
+
+    running = True
+
+    while running:
+        
+        points = summ_card(**users_card)
+        print("Your summ = ", points)
+
+        if points == 21:
+            print('Congratulation you win!')
+            break
+        elif points > 21:
+            print('You loose')
+            break
+        else:
+            print('Want to get one more card?')
+            game(card, **deck)
+

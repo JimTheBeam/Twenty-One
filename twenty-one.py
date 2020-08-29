@@ -60,15 +60,18 @@ def enter_answer():
     return answer
 
 
+def print_cards(*users_deck):
+    print('Your cards:')
+    print(users_deck[0])
 
 
 
 if __name__ == '__main__':
 
-    print('Game started \nYou get: ')
+    print('Game started')
     users_deck = add_newcard_in_udeck(*users_deck, **deck)
     users_deck = add_newcard_in_udeck(*users_deck, **deck)  
-    print(users_deck)
+    print_cards(users_deck)
     
     while True:
         points = summ_card(*users_deck, **deck)
@@ -86,11 +89,10 @@ if __name__ == '__main__':
             answer = enter_answer()
             if answer == 1:
                 users_deck = add_newcard_in_udeck(*users_deck, **deck)
-                print(users_deck)
+                print_cards(users_deck)
                 continue
             elif answer == 2:
-                print('Your cards:')
-                print(users_deck)
+                print_cards(users_deck)
                 print('Your summ = {points}'.format(points=points))
                 break
             else:

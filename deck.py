@@ -38,11 +38,3 @@ deck = {'6 heart' : 6,
         'K club' : 4,
         'Ace club' : 11
         }
-
-
-test_deck = [2, 3, 4, 6, 7, 8, 9, 10, 11] * 4
-
-test_deck_name = []
-for name in deck:
-    test_deck_name.append(name)
-

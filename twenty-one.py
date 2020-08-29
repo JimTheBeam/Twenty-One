@@ -31,6 +31,7 @@ def add_newcard_in_udeck(*users_deck, **deck):
         else:
             break
     users_deck.append(card)
+    print('Your new card: {}'.format(card))
     return users_deck
 
 
@@ -45,20 +46,18 @@ def summ_card(*users_deck, **deck):
     return points
 
 
-
-
-def check_win(summ_card):
-    if summ_card == 21:
-        print('Congratulation you win!')
-    elif summ_card > 21:
-        print('You loose')
-    else:
-        print('Want to get one more card?')
-
-
-
-
-
+def enter_answer():
+    while True:
+        try:
+            answer = int(input())
+            if 0 < answer < 3:
+                break
+            else:
+                print('Only 1 for YES and 2 for NO')
+                continue
+        except ValueError:
+            print('Wrong input try one more time.')
+    return answer
 
 
 
@@ -71,23 +70,33 @@ if __name__ == '__main__':
     users_deck = add_newcard_in_udeck(*users_deck, **deck)  
     print(users_deck)
     
-
-    points = summ_card(*users_deck, **deck)
-
-    # running = True
-
-    # while running:
+    while True:
+        points = summ_card(*users_deck, **deck)
+        print("Your summ = ", points)
         
-    #     points = summ_card(*users_deck)
-    #     print("Your summ = ", points)
+        if points == 21:
+            print('Congratulation you win!')
+            break
+        elif points > 21:
+            print('You loose')
+            break
+        else:
+            print('Do you want to get one more card?')
+            print('Enter 1 for YES, 2 for NO')
+            answer = enter_answer()
+            if answer == 1:
+                users_deck = add_newcard_in_udeck(*users_deck, **deck)
+                print(users_deck)
+                continue
+            elif answer == 2:
+                print('Your cards:')
+                print(users_deck)
+                print('Your summ = {points}'.format(points=points))
+                break
+            else:
+                print('Error')
+                break
+            
+    print('Game over')
 
-    #     if points == 21:
-    #         print('Congratulation you win!')
-    #         break
-    #     elif points > 21:
-    #         print('You loose')
-    #         break
-    #     else:
-    #         print('Want to get one more card?')
-    #         game(card, **deck)
 

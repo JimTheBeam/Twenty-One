@@ -1,6 +1,17 @@
 from random import choice
 
-from deck import deck
+import sys
+
+from ruamel.yaml import YAML
+
+# from deck import deck
+
+
+# import card deck from yaml file
+yaml = YAML(typ='safe')
+deck2 = yaml.load(open('deck1.yml'))
+deck = deck2.get('yamldeck')
+print(deck)
 
 
 # create new list of users card

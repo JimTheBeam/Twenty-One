@@ -2,6 +2,8 @@ from random import choice
 
 import sys
 
+import shelve
+
 from ruamel.yaml import YAML
 
 # from deck import deck
@@ -11,7 +13,6 @@ from ruamel.yaml import YAML
 yaml = YAML(typ='safe')
 deck2 = yaml.load(open('deck1.yml'))
 deck = deck2.get('yamldeck')
-print(deck)
 
 
 # create new list of users card
@@ -76,12 +77,27 @@ def print_cards(*users_deck):
     print(users_deck[0])
 
 
+def lider(points):
+    # import liderboard from shelve file
+    liderboard = shelve.open('liderboard')
+    
+    name = input('Enter your name: ')
+    liderboard[name] = str(points)
+
+    print('liderborad')
+    for item in liderboard.items():
+        print(item)
+
+    # liderboard.clear()
+    liderboard.close()
+    
+
 
 if __name__ == '__main__':
 
     print('Game started')
-    users_deck = add_newcard_in_udeck(*users_deck, **deck)
-    users_deck = add_newcard_in_udeck(*users_deck, **deck)  
+    for x in range(2):
+        users_deck = add_newcard_in_udeck(*users_deck, **deck) 
     print_cards(users_deck)
     
     while True:
@@ -109,7 +125,8 @@ if __name__ == '__main__':
             else:
                 print('Error')
                 break
-            
+
+    lider(points)        
     print('Game over')
 
 

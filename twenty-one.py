@@ -9,54 +9,40 @@ from ruamel.yaml import YAML
 # from deck import deck
 
 # TODO: бота 
-# FIXME: ВАУ ЭТО РАБОТАЕТ
+
 
 # import card deck from yaml file
 yaml = YAML(typ='safe')
 deck2 = yaml.load(open('deck1.yml'))
 deck = deck2.get('yamldeck')
-
+print(len(deck))
 
 # create new list of users card
-users_deck = []
+# FIXME: before here was list
+users_deck = {}
 
 
 # get random card from deck (return dict)
 def rand_card(deck):
-    card = choice(list(deck.keys()))
+    card = choice(list(deck.items()))
     return card
 
 
-# if_card_in_udeck - check if random card is in users deck. Return True if IN
-def if_card_in_udeck(card, users_deck):
-    if card in users_deck:
-        return True
-    else:
-        return False
-
 
 # add random card in users deck. Return list of users card
-def add_newcard_in_udeck(users_deck, deck):
-    users_deck = list(users_deck)
-    while True:
-        card = rand_card(deck)
-        if if_card_in_udeck(card, users_deck):
-            continue
-        else:
-            break
-    users_deck.append(card)
-    print('Your new card: {}'.format(card))
+def add_newcard(users_deck, deck):
+    card = choice(list(deck.items())) #pick card randomly from deck
+    del deck[card[0]] #del card from deck
+    users_deck[card[0]] = card[1] #add card in users_deck
+
     return users_deck
 
 
 # get users_deck, return summ of the card
-def summ_card(users_deck, deck):
+def summ_card(users_deck):
     points = 0
-    for name in users_deck:
-        if deck.get(name) == None:
-            pass
-        else:
-            points += deck.get(name)
+    for x in users_deck.values():
+        points += x
     return points
 
 
@@ -74,9 +60,10 @@ def enter_answer():
     return answer
 
 
+# print cards in users_deck
 def print_cards(users_deck):
     print('Your cards:')
-    print(users_deck[0])
+    print(list(users_deck.keys()))
 
 
 def lider(points):
@@ -99,13 +86,13 @@ if __name__ == '__main__':
 
     print('Game started')
     for x in range(2):
-        users_deck = add_newcard_in_udeck(users_deck, deck) 
+        users_deck = add_newcard(users_deck, deck) 
     print_cards(users_deck)
-    
+
     while True:
-        points = summ_card(users_deck, deck)
+        points = summ_card(users_deck)
         print("Your summ = ", points)
-        
+
         if points == 21:
             print('Congratulation you win!')
             break
@@ -117,7 +104,7 @@ if __name__ == '__main__':
             print('Enter 1 for YES, 2 for NO')
             answer = enter_answer()
             if answer == 1:
-                users_deck = add_newcard_in_udeck(users_deck, deck)
+                users_deck = add_newcard(users_deck, deck)
                 print_cards(users_deck)
                 continue
             elif answer == 2:

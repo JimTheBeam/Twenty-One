@@ -2,3 +2,7 @@
 __pycache__
 *.pyc
 settings.py
+*.log
+db.sql
+*liderboard*
+database/pictures/

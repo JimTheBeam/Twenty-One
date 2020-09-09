@@ -8,17 +8,15 @@ from ruamel.yaml import YAML
 
 # from deck import deck
 
-# TODO: бота 
-
 
 # import card deck from yaml file
 yaml = YAML(typ='safe')
-deck2 = yaml.load(open('deck1.yml'))
-deck = deck2.get('yamldeck')
+deck = yaml.load(open('deck1.yml'))
+deck = deck.get('yamldeck')
 print(len(deck))
 
+
 # create new list of users card
-# FIXME: before here was list
 users_deck = {}
 
 
@@ -28,13 +26,11 @@ def rand_card(deck):
     return card
 
 
-
 # add random card in users deck. Return list of users card
 def add_newcard(users_deck, deck):
     card = choice(list(deck.items())) #pick card randomly from deck
     del deck[card[0]] #del card from deck
     users_deck[card[0]] = card[1] #add card in users_deck
-
     return users_deck
 
 

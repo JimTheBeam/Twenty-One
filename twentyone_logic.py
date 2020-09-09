@@ -1,6 +1,8 @@
 from random import choice
 
-import sys
+import os
+
+import sqlite3
 
 import shelve
 
@@ -14,6 +16,8 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
 from telegram import ReplyKeyboardMarkup, TelegramError
 
 from keyboard import my_keyboard, game_keyboard, file_keyboard
+
+import database.card_db as database
 
 
 
@@ -62,17 +66,16 @@ def lider(points):
 # TODO: сделать проверку отправилась ли фотка в телегу пользователю
 def try_to_send_photo(update, context):
     print('photo')
-    photo_id1 = 'AgACAgIAAxkBAAIN0l9Y9COQs8TZlJE4QZZSq4-CrD5UAAI3rzEbUNnISrXv8Ro0jJWk4k7zly4AAwEAAwIAA3kAA_pfAAIbBA'
-    photo_id = 'ksajfdhhg'
+    photo_id = 'AgACAgIAAxkBAAIN0l9Y9COQs8TZlJE4QZZSq4-CrD5UAAI3rzEbUNnISrXv8Ro0jJWk4k7zly4AAwEAAwIAA3kAA_pfAAIbBA'
     chat_id = update.effective_chat.id
 
     # try to send photo using photo_id
     try:
-        context.bot.send_photo(chat_id=chat_id,photo=photo_id1)   
+        context.bot.send_photo(chat_id=chat_id,photo=photo_id)   
         print('photo was sent') 
     except TelegramError:
         print('impossible to send photo')
-
+        # TODO: здесь нужно код для отправки из файла
 
 
 
@@ -126,6 +129,33 @@ def stop(update, context):
     text = 'Game over'
     update.message.reply_text(text=text, reply_markup=my_keyboard())
     return ConversationHandler.END
+
+
+# FIXME: допилить это
+# TODO: сделать функцию, которая добавит telegram_id в таблицу sql
+def add_telegram_id_in_sql(update, context):
+    print("hi")
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+    sql = '''SELECT card_key FROM deck ORDER BY id'''
+    cursor.execute(sql)
+    list_card_keys = cursor.fetchall() #all card_keyS
+    # print(list_card_keys)
+
+    # for card_key in list_card_keys:
+
+    file_path = database.get_column_file_path(cursor)
+    print(file_path)
+
+    # send photo to user
+    # chat_id = update.effective_chat.id
+    # photo = context.user_data['photo_id'][0]
+    # print(len(photo))
+    # context.bot.send_photo(chat_id=chat_id, photo=photo)
+
+
+
+
 
 
 # FIXME: сделать эту функцию, которая выдает 2 карты пользователю

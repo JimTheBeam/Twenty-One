@@ -126,6 +126,49 @@ def get_telegram_id(cursor, card_key):
         print('Error. Wrong args')
 
 
+def get_column_file_path(cursor):
+    '''get list one of file_path from database in order id 
+    :cursor: object sqlite
+    :return: list'''
+    select = 'SELECT file_path FROM deck ORDER BY id'
+    try:      
+        cursor.execute(select)
+        result = cursor.fetchall()
+        return result
+    except sqlite3.InterfaceError:
+        print('Error. Wrong args')
+        return None
+
+
+def get_column_card_key(cursor):
+    '''get list card_key from database in order id 
+    :cursor: object sqlite
+    :return: list'''
+    select = 'SELECT card_key FROM deck ORDER BY id'
+    try:      
+        cursor.execute(select)
+        result = cursor.fetchall()
+        return result
+    except sqlite3.InterfaceError:
+        print('Error. Wrong args')
+        return None
+
+
+def get_column_points(cursor):
+    '''get list points from database in order id 
+    :cursor: object sqlite
+    :return: list'''
+    select = 'SELECT points FROM deck ORDER BY id'
+    try:      
+        cursor.execute(select)
+        result = cursor.fetchall()
+        return result
+    except sqlite3.InterfaceError:
+        print('Error. Wrong args')
+        return None
+
+
+
 # TODO: MAIN FUNC!
 def main():
     # Creating connection:

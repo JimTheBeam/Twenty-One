@@ -9,7 +9,8 @@ import settings
 
 from keyboard import my_keyboard, game_keyboard
 
-from twentyone_logic import start_game, game, stop, check_photo, file_name, try_to_send_photo
+from twentyone_logic import start_game, game, stop, check_photo, file_name,\
+                     try_to_send_photo, add_telegram_id_in_sql
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -55,6 +56,7 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help_command))
     dp.add_handler(CommandHandler("photo", try_to_send_photo))
+    dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
 
 
     # get file_ID

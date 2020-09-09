@@ -131,27 +131,28 @@ def stop(update, context):
     return ConversationHandler.END
 
 
-# FIXME: допилить это
-# TODO: сделать функцию, которая добавит telegram_id в таблицу sql
+
 def add_telegram_id_in_sql(update, context):
-    print("hi")
+    '''send photos from file to telegram,
+    get telegram_id and insert them in database'''
+    # create connection to database:
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
-    sql = '''SELECT card_key FROM deck ORDER BY id'''
-    cursor.execute(sql)
-    list_card_keys = cursor.fetchall() #all card_keyS
-    # print(list_card_keys)
 
-    # for card_key in list_card_keys:
-
+    # get file_path from database
     file_path = database.get_column_file_path(cursor)
-    print(file_path)
 
-    # send photo to user
-    # chat_id = update.effective_chat.id
-    # photo = context.user_data['photo_id'][0]
-    # print(len(photo))
-    # context.bot.send_photo(chat_id=chat_id, photo=photo)
+    # send photo to user and get telegram_id
+    chat_id = update.effective_chat.id
+    for item in file_path:
+        # send photo:
+        photo = open(item[0], 'rb')
+        mess = context.bot.send_photo(chat_id=chat_id, photo=photo)
+        #get telegram_id:
+        telegram_id = mess.photo[1].file_id
+        # update telegram_id in database
+        database.update_telegram_id(conn, telegram_id, item[0])
+
 
 
 

@@ -39,7 +39,7 @@ def get_file_path():
     files = os.listdir(pic)
     b = []
     for item in files:
-        b.append('{0}{1}'.format(pic, item))
+        b.append('database/{0}{1}'.format(pic, item))
     return b
 
 
@@ -88,16 +88,16 @@ def print_data(cursor):
         print(row)
 
 
-def update_telegram_id(conn, telegram_id, card_key):
+def update_telegram_id(conn, telegram_id, file_path):
     '''update telegram_id card using card_key
     :conn: connection to database
     :telegram_id: new telegram_id
     :card_key: card we update'''
     cursor = conn.cursor()
-    data = (telegram_id, card_key)
+    data = (telegram_id, file_path)
     update = '''UPDATE deck 
                 SET telegram_id = ? 
-                WHERE card_key = ?'''
+                WHERE file_path = ?'''
     try:
         # try to update telegram_id
         cursor.execute(update, data)

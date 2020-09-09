@@ -9,7 +9,7 @@ import settings
 
 from keyboard import my_keyboard, game_keyboard
 
-from twentyone_logic import start_game, game, stop, check_photo, file_name,\
+from twentyone_logic import start_game, game, stop,\
                      try_to_send_photo, add_telegram_id_in_sql
 
 # Enable logging
@@ -55,21 +55,8 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help_command))
-    dp.add_handler(CommandHandler("photo", try_to_send_photo))
-    dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
-
-
-    # get file_ID
-    # dp.add_handler(MessageHandler(Filters.photo, check_photo))
-    photo_handler = ConversationHandler(
-            entry_points=[MessageHandler(Filters.photo, check_photo)],
-            states={
-                'File name': [MessageHandler(Filters.text, file_name)]
-            },
-            fallbacks=[MessageHandler(Filters.regex('^(STOP)$'), stop),
-            CommandHandler('start', start)]
-    )
-    dp.add_handler(photo_handler)
+    # dp.add_handler(CommandHandler("photo", try_to_send_photo))
+    # dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
 
 
     game_handler = ConversationHandler(

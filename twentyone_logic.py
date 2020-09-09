@@ -83,44 +83,6 @@ def try_to_send_photo(update, context):
 
 
 
-# FIXME: доработать функцию получения file_id
-# get file_id for photo
-def check_photo(update, context):
-    '''get file_id of photo user sent to bot'''
-    update.message.reply_text('Обрабатываю фото', reply_markup=file_keyboard())
-    photo_id = update.message.photo[-1].file_id
-    print(photo_id)
-    
-    # pass photo_id to user_data
-    context.user_data['photo_id'] = [photo_id]
-
-    update.message.reply_text('напиши название', reply_markup=file_keyboard())
-    return 'File name'
-
-
-# FIXME: функция, которая получает название файла и записывает в файл
-# get file name from user
-def file_name(update, context):
-    file_name = update.message.text
-    context.user_data['file_name'] = [file_name]
-
-      
-    update.message.reply_text(file_name, reply_markup=file_keyboard())
-
-    text = 'Your file has been saved under the name {}'.format(file_name)
-    update.message.reply_text(text, reply_markup=my_keyboard()) 
-
-    # send photo to user
-    chat_id = update.effective_chat.id
-    photo = context.user_data['photo_id'][0]
-    print(len(photo))
-    context.bot.send_photo(chat_id=chat_id, photo=photo)
-
-    return ConversationHandler.END
-
-
-
-
 
 
 
@@ -131,17 +93,16 @@ def stop(update, context):
     return ConversationHandler.END
 
 
-
+# this func do not needed in the game
+# func updates database
 def add_telegram_id_in_sql(update, context):
     '''send photos from file to telegram,
     get telegram_id and insert them in database'''
     # create connection to database:
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
-
     # get file_path from database
     file_path = database.get_column_file_path(cursor)
-
     # send photo to user and get telegram_id
     chat_id = update.effective_chat.id
     for item in file_path:
@@ -199,7 +160,7 @@ def game(users_deck, deck):
     for _ in range(2):
         users_deck = add_newcard(users_deck, deck) 
 
-
+# FIXME: cod below is needed to fix
     while True:
         points = summ_card(users_deck)
         print("Your summ = ", points)

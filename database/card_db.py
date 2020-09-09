@@ -88,6 +88,36 @@ def print_data(cursor):
         print(row)
 
 
+# TODO: сделать функцию для получения всей инфы из бд
+def get_all():
+    # Creating connection:
+    conn = sqlite3.connect('deck.db')
+
+    # create object cursor:
+    cursor = conn.cursor()
+    
+    # get data from database:
+    sql = 'SELECT * FROM deck'
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    # data - list of tuple:
+    # [(id, file_path, telegram_id, card_key, create_time), (,,),(,,)]
+
+    deck_dict = {}
+    # create new dict:
+    # {id: {file_path: value, telegram_id: value, card_key: value, create_time: value}}
+    for item in data:
+        deck_dict[item[0]] = {'file_path': item[1],
+                      'telegram_id': item[2],
+                      'card_key': item[3],
+                      'points': item[4],
+                      'create_time': item[5]}
+
+    # close connection to database
+    conn.close
+    return deck_dict
+
+
 def update_telegram_id(conn, telegram_id, file_path):
     '''update telegram_id card using card_key
     :conn: connection to database
@@ -166,6 +196,7 @@ def get_column_points(cursor):
     except sqlite3.InterfaceError:
         print('Error. Wrong args')
         return None
+
 
 
 

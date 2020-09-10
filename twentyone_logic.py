@@ -22,12 +22,6 @@ import database.card_db as database
 
 
 
-# get random card from deck (return dict)
-def rand_card(deck):
-    card = choice(list(deck.items()))
-    return card
-
-
 # add random card in users deck. Return list of users card
 def add_newcard(users_deck, deck):
     '''pick card randomly from deck and add it in users deck'''
@@ -44,12 +38,23 @@ def add_newcard(users_deck, deck):
     return users_deck
 
 
+# TODO: запилить функцию получения очков из users_deck
 # get users_deck, return summ of the card
-def summ_card(users_deck):
-    points = 0
-    for x in users_deck.values():
-        points += x
+def get_users_deck_points(users_deck):
+    '''
+    :users_deck: dict of users_card
+    :return: int points
+    '''
+    points = 0  
+    for item in users_deck.values():
+        points += item['points']
     return points
+
+
+
+
+
+
 
 
 # liderboard
@@ -70,7 +75,7 @@ def lider(points):
 
 
 
-
+# TODO: эта функция не нужна, ее можно удалить
 # TODO: сделать проверку отправилась ли фотка в телегу пользователю
 def try_to_send_photo(update, context):
     print('photo')
@@ -125,7 +130,8 @@ def add_telegram_id_in_sql(update, context):
 
 # TODO: делает список телеграм айди в колоде пользователя
 def get_telegram_id_from_user_deck(users_deck):
-    ''':users_deck: dict of users_card
+    '''
+    :users_deck: dict of users_card
     :return: list of telegram_id in users_deck
     ['telegram_id1', 'telegram_id2', ...]
     '''
@@ -136,7 +142,8 @@ def get_telegram_id_from_user_deck(users_deck):
 
 
 def get_media(users_deck):
-    ''':users_deck: dict of users_card
+    '''
+    :users_deck: dict of users_card
     :return: list of InputMediaPhoto(telegram_id) in users_deck
     [InputMediaPhoto('telegram_id1'), InputMediaPhoto(''telegram_id2'), ...]
     '''
@@ -149,10 +156,9 @@ def get_media(users_deck):
     return media
 
 
-
+# FIXME: добавить проверку на поинты!
 # FIXME: сделать эту функцию, которая выдает 2 карты пользователю
 def start_game(update, context):
-    print('START GAME')
     # get deck from database:
     deck = database.get_deck()
     
@@ -176,9 +182,6 @@ def start_game(update, context):
     try:
         # send group of photo:
         context.bot.send_media_group(chat_id=chat_id, media=media)
-        # send message with new keyboard
-        context.bot.send_message(chat_id= chat_id, 
-                    text='Want another card?', reply_markup=game_keyboard())
     except TelegramError:
         # send message to user that something went wrong
         text = 'Something went wrong. Try again.'
@@ -186,6 +189,10 @@ def start_game(update, context):
                     text=text, reply_markup=my_keyboard())
         print('TelegramError')
         return ConversationHandler.END
+
+    # send message with new keyboard
+    context.bot.send_message(chat_id= chat_id, 
+                text='Want another card?', reply_markup=game_keyboard())
     return 'GAME'
 
 
@@ -195,7 +202,6 @@ def start_game(update, context):
 
 # TODO: сделать функцию игры(но после разборок с функцией start_game)
 def game(update, context):
-    print('GAME')
     # user_data is dict
     user_data = context.user_data
     # insert deck and users_deck in user_data
@@ -210,9 +216,13 @@ def game(update, context):
 
     # get media from users_deck
     media = get_media(users_deck)
-    # отправляем медиа группу(несколько фоток сразу)
+
     try:
+        # send group of photo:
         context.bot.send_media_group(chat_id=chat_id, media=media)
+        # send message with new keyboard
+        context.bot.send_message(chat_id= chat_id, 
+                    text='Want another card?', reply_markup=game_keyboard())
     except TelegramError:
         # send message to user that something went wrong
         text = 'Something went wrong. Try again.'
@@ -223,4 +233,19 @@ def game(update, context):
     return 'GAME'
 
     # lider(points)        
+
+
+def enough(update, context):
+    # user_data is dict
+    user_data = context.user_data
+    # insert deck and users_deck in user_data
+    users_deck = user_data['users_deck']
+    chat_id = update.effective_chat.id
+
+    points = get_users_deck_points(users_deck)
+    
+    text = 'Game over! Your points: {}'.format(points)
+    context.bot.send_message(chat_id= chat_id, 
+                    text=text, reply_markup=my_keyboard())
+    return ConversationHandler.END
 

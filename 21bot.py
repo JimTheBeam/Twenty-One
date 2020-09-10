@@ -10,7 +10,7 @@ import settings
 from keyboard import my_keyboard, game_keyboard
 
 from twentyone_logic import start_game, game, stop,\
-                     try_to_send_photo, add_telegram_id_in_sql
+                      add_telegram_id_in_sql, enough
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -31,18 +31,20 @@ def start(update, context):
     update.message.reply_text(text2, reply_markup=my_keyboard())
 
 
+# TODO: Add help!!!
 # answers to /help command
 def help_command(update, context):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help!')
+    text = 'The aim is to score exactly twenty-one points \
+or to come as close to twenty-one as possible, \
+based on the card values dealt. \
+The numeral cards 6 to 10 have their face values, \
+Jacks valued at 2, \
+Queens valued at 3, \
+Kings valued at 4, \
+Aces valued at 11'
+    update.message.reply_text(text)
 
-
-# FIXME: need to del this func
-# def echo(update, context):
-#     """Echo the user message."""
-#     update.message.reply_text(update.message.text)
-
-    
 
 
 def main():
@@ -55,14 +57,15 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help_command))
-    # dp.add_handler(CommandHandler("photo", try_to_send_photo))
     # dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
+    dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
 
 
     game_handler = ConversationHandler(
             entry_points=[MessageHandler(Filters.regex('^(Play Game!)$'), start_game)],
             states={
-                'GAME': [MessageHandler(Filters.regex('^(Another card)$'), game)]
+                'GAME': [MessageHandler(Filters.regex('^(Another card)$'), game),
+                        MessageHandler(Filters.regex('^(Enough)$'), enough)]
             },
             fallbacks=[MessageHandler(Filters.regex('^(STOP)$'), stop),
             CommandHandler('start', start)]

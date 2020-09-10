@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup,\
 
 # keyboard:
 def my_keyboard():
-    keyboard = ReplyKeyboardMarkup([['Play Game!'], ['help!', 'STOP']], resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup([['Play Game!'], ['Help!']], resize_keyboard=True)
     return keyboard
 
 def game_keyboard():

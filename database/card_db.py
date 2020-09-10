@@ -8,7 +8,7 @@ def create_table(conn):
     '''create a table'''
     try:
         conn.execute('''
-            CREATE TABLE Deck
+            CREATE TABLE deck
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
             file_path   VARCHAR(50)  NOT NULL UNIQUE,
             telegram_id VARCHAR(150) UNIQUE,
@@ -88,10 +88,12 @@ def print_data(cursor):
         print(row)
 
 
-# TODO: сделать функцию для получения всей инфы из бд
-def get_all():
+def get_deck():
+    '''Connect to database, get data and create card deck dictionary
+    return card deck dictionary
+    function must be called from file: twentyone_logic.py'''
     # Creating connection:
-    conn = sqlite3.connect('deck.db')
+    conn = sqlite3.connect('database/deck.db')
 
     # create object cursor:
     cursor = conn.cursor()
@@ -112,7 +114,7 @@ def get_all():
                       'card_key': item[3],
                       'points': item[4],
                       'create_time': item[5]}
-
+   
     # close connection to database
     conn.close
     return deck_dict

@@ -13,7 +13,7 @@ from ruamel.yaml import YAML
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
                         ConversationHandler, CallbackQueryHandler
 
-from telegram import ReplyKeyboardMarkup, TelegramError
+from telegram import ReplyKeyboardMarkup, TelegramError, InputMedia, InputMediaPhoto
 
 from keyboard import my_keyboard, game_keyboard, file_keyboard
 
@@ -30,9 +30,17 @@ def rand_card(deck):
 
 # add random card in users deck. Return list of users card
 def add_newcard(users_deck, deck):
-    card = choice(list(deck.items())) #pick card randomly from deck
-    del deck[card[0]] #del card from deck
-    users_deck[card[0]] = card[1] #add card in users_deck
+    '''pick card randomly from deck and add it in users deck'''
+    while True:
+        #pick card randomly from deck
+        card = choice(list(deck.items()))
+        # check if card in users_deck:
+        if card[0] in users_deck.keys():
+            continue
+        else:
+            #add card in users_deck
+            users_deck[card[0]] = card[1] 
+            break
     return users_deck
 
 
@@ -115,6 +123,12 @@ def add_telegram_id_in_sql(update, context):
         database.update_telegram_id(conn, telegram_id, item[0])
 
 
+# TODO: делает список телеграм айди в колоде пользователя
+def get_telegram_id_from_user_deck(users_deck):
+    file_id = []        
+    for item in users_deck.values():
+        file_id.append(item['telegram_id'])
+    return file_id
 
 
 
@@ -123,31 +137,47 @@ def add_telegram_id_in_sql(update, context):
 # FIXME: сделать эту функцию, которая выдает 2 карты пользователю
 def start_game(update, context):
     print('START GAME')
-    # import card deck from yaml file
-    yaml = YAML(typ='safe')
-    deck = yaml.load(open('deck1.yml'))
-    deck = deck.get('yamldeck')
-
+    # get deck from database:
+    deck = database.get_deck()
     
     # cards in user's hands:
     users_deck = {}
-
+# TODO: ИЗМЕНИТЬ ЗНАЧЕНИЕ RANGE НА 2!!!
     for _ in range(2):
         users_deck = add_newcard(users_deck, deck) 
-    
-    cards = list(users_deck.keys())
-    print(cards) #it's a list obj. ['1', '2']
+    # print(users_deck.values())
+ 
+    # cards = list(users_deck.values())[0]
+    # print(cards) #it's a list obj. ['1', '2']
     
     # send cards to user
-    update.message.reply_text(text='Your cards:', reply_markup=my_keyboard())
+    # update.message.reply_text(text='Your cards:', reply_markup=my_keyboard())
 
+# TODO: достать значения telegram_id из users_deck и отправить карты пользователю
+# TODO: сделал так чтобы отправлялась пока 1 карта
+# TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
     # send picture:
     chat_id = update.effective_chat.id
-    photo = open('foto/cards.jpg', 'rb')
-    context.bot.send_photo(chat_id=chat_id, photo=photo)
+    # photo = cards.get('telegram_id')
+    photo = get_telegram_id_from_user_deck(users_deck)
+    print('photo:')
+    print(photo)
+    
+    # делаем список медиа с telegram_id для отправки нескольких файлов
+    media = []
+    for item in photo:
+        media.append(InputMediaPhoto(item))
 
-    # send list of user's card
-    update.message.reply_text(text=cards, reply_markup=game_keyboard())
+    # отправляем 1-ую фотку:
+    # context.bot.send_photo(chat_id=chat_id, photo=photo[0])
+    # # отправляем 2-ую фотку:
+    # context.bot.send_photo(chat_id=chat_id, photo=photo[1])
+
+    # отправляем медиа группу(несколько фоток сразу)
+    try:
+        context.bot.send_media_group(chat_id=chat_id, media=media)
+    except TelegramError:
+        print('TelegramError')
     return 'GAME'
 
 

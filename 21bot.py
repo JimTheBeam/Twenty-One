@@ -31,18 +31,17 @@ def start(update, context):
     update.message.reply_text(text2, reply_markup=my_keyboard())
 
 
-# TODO: Add help!!!
 # answers to /help command
 def help_command(update, context):
     """Send a message when the command /help is issued."""
-    text = 'The aim is to score exactly twenty-one points \
+    text = '''The aim is to score exactly twenty-one points \
 or to come as close to twenty-one as possible, \
-based on the card values dealt. \
-The numeral cards 6 to 10 have their face values, \
-Jacks valued at 2, \
-Queens valued at 3, \
-Kings valued at 4, \
-Aces valued at 11'
+based on the card values dealt.
+The numeral cards 6 to 10 have their face values,
+Jacks valued at 2,
+Queens valued at 3,
+Kings valued at 4,
+Aces valued at 11'''
     update.message.reply_text(text)
 
 
@@ -67,14 +66,10 @@ def main():
                 'GAME': [MessageHandler(Filters.regex('^(Another card)$'), game),
                         MessageHandler(Filters.regex('^(Enough)$'), enough)]
             },
-            fallbacks=[MessageHandler(Filters.regex('^(STOP)$'), stop),
+            fallbacks=[MessageHandler(Filters.regex('^(Quit game)$'), stop),
             CommandHandler('start', start)]
             )
     dp.add_handler(game_handler)
-
-
-    # on noncommand i.e message - echo the message on Telegram
-    # dp.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
 
     # Start the Bot
     updater.start_polling()

@@ -8,10 +8,8 @@ def my_keyboard():
     return keyboard
 
 def game_keyboard():
-    keyboard = ReplyKeyboardMarkup([['Another card', 'Enough'], ['STOP']], resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup([['Another card', 'Enough'], ['Quit game']], resize_keyboard=True)
     return keyboard
 
 
-def file_keyboard():
-    keyboard = ReplyKeyboardMarkup([['STOP']], resize_keyboard=True)
-    return keyboard
+

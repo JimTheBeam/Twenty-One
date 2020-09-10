@@ -15,7 +15,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
 
 from telegram import ReplyKeyboardMarkup, TelegramError, InputMedia, InputMediaPhoto
 
-from keyboard import my_keyboard, game_keyboard, file_keyboard
+from keyboard import my_keyboard, game_keyboard
 
 import database.card_db as database
 
@@ -45,7 +45,7 @@ def get_users_deck_points(users_deck):
     :users_deck: dict of users_card
     :return: int points
     '''
-    points = 0  
+    points = 0
     for item in users_deck.values():
         points += item['points']
     return points
@@ -108,6 +108,8 @@ def stop(update, context):
 
 # this func do not needed in the game
 # func updates database
+# TODO: удалить эту функцию и переделать логику отправки файлов
+# TODO: на попытку отправки через telegram_id, если не получилось - отправка через файл
 def add_telegram_id_in_sql(update, context):
     '''send photos from database file to telegram,
     get telegram_id and insert them in database'''
@@ -156,6 +158,30 @@ def get_media(users_deck):
     return media
 
 
+def text_check_points(points):
+    '''check if points higher 21
+    return text for message to user'''
+    if points == 21:
+        text = 'Congratulation you win! Your points: {}'.format(points)
+    elif points > 21:
+        text = 'You loose! Your points: {}'.format(points)
+    else:
+        text = 'Your points: {}. Want another card?'.format(points)
+    return text
+
+
+def keyboard_check_points(points):
+    '''check if points higher 21
+    return keyboard for message to user'''
+    if points == 21:
+        keyboard = my_keyboard()
+    elif points > 21:
+        keyboard = my_keyboard()
+    else:
+        keyboard = game_keyboard()
+    return keyboard
+
+
 # FIXME: добавить проверку на поинты!
 # FIXME: сделать эту функцию, которая выдает 2 карты пользователю
 def start_game(update, context):
@@ -166,6 +192,9 @@ def start_game(update, context):
     users_deck = {}
     for _ in range(2):
         users_deck = add_newcard(users_deck, deck) 
+
+    # get points:
+    points = get_users_deck_points(users_deck)
 
     # user_data is dict. It's empty here
     user_data = context.user_data
@@ -190,10 +219,20 @@ def start_game(update, context):
         print('TelegramError')
         return ConversationHandler.END
 
-    # send message with new keyboard
-    context.bot.send_message(chat_id= chat_id, 
-                text='Want another card?', reply_markup=game_keyboard())
-    return 'GAME'
+    # check points with 21 and send message to user:
+    text = text_check_points(points)
+    if points == 21:      
+        context.bot.send_message(chat_id= chat_id, 
+                text=text, reply_markup=my_keyboard())
+        return ConversationHandler.END
+    elif points > 21:
+        context.bot.send_message(chat_id= chat_id, 
+                text=text, reply_markup=my_keyboard())
+        return ConversationHandler.END
+    else:
+        context.bot.send_message(chat_id= chat_id, 
+                text=text, reply_markup=game_keyboard())
+        return 'GAME'
 
 
 
@@ -207,9 +246,25 @@ def game(update, context):
     # insert deck and users_deck in user_data
     deck = user_data['deck']
     users_deck = user_data['users_deck']
+
+    # TODO: добавить проверку по points
+    incoming_points = get_users_deck_points(users_deck)
+    # check if points are more than 21:
+    if incoming_points == 21:
+        text = text_check_points(incoming_points)
+        update.message.reply_text(text=text, reply_markup=my_keyboard())
+        return ConversationHandler.END
+    elif incoming_points > 21:
+        text = text_check_points(incoming_points)
+        update.message.reply_text(text=text, reply_markup=my_keyboard())
+        return ConversationHandler.END
+
     
     # add card in users_deck
     users_deck = add_newcard(users_deck, deck) 
+    # get points:
+    points = get_users_deck_points(users_deck)
+
 
 # TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
     chat_id = update.effective_chat.id
@@ -221,8 +276,10 @@ def game(update, context):
         # send group of photo:
         context.bot.send_media_group(chat_id=chat_id, media=media)
         # send message with new keyboard
+        text = text_check_points(points)
+        keyboard = keyboard_check_points(points)
         context.bot.send_message(chat_id= chat_id, 
-                    text='Want another card?', reply_markup=game_keyboard())
+                    text=text, reply_markup=keyboard)
     except TelegramError:
         # send message to user that something went wrong
         text = 'Something went wrong. Try again.'
@@ -230,6 +287,17 @@ def game(update, context):
                     text=text, reply_markup=my_keyboard())
         print('TelegramError')
         return ConversationHandler.END
+    
+    # check if points are more than 21:
+    if points == 21:
+        # text = 'Congratulation you win!'
+        # update.message.reply_text(text=text, reply_markup=my_keyboard())
+        return ConversationHandler.END
+    elif points > 21:
+        # text = 'You loose! Your points: {}'.format(points)
+        # update.message.reply_text(text=text, reply_markup=my_keyboard())
+        return ConversationHandler.END
+
     return 'GAME'
 
     # lider(points)        

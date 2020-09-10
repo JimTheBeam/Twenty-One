@@ -62,7 +62,7 @@ def main():
     game_handler = ConversationHandler(
             entry_points=[MessageHandler(Filters.regex('^(Play Game!)$'), start_game)],
             states={
-                'GAME': [MessageHandler(Filters.regex('^(Play Game!)$'), game)]
+                'GAME': [MessageHandler(Filters.regex('^(Another card)$'), game)]
             },
             fallbacks=[MessageHandler(Filters.regex('^(STOP)$'), stop),
             CommandHandler('start', start)]

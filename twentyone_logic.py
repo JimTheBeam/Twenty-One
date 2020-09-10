@@ -104,7 +104,7 @@ def stop(update, context):
 # this func do not needed in the game
 # func updates database
 def add_telegram_id_in_sql(update, context):
-    '''send photos from file to telegram,
+    '''send photos from database file to telegram,
     get telegram_id and insert them in database'''
     # create connection to database:
     conn = sqlite3.connect('database/deck.db')
@@ -125,12 +125,28 @@ def add_telegram_id_in_sql(update, context):
 
 # TODO: делает список телеграм айди в колоде пользователя
 def get_telegram_id_from_user_deck(users_deck):
+    ''':users_deck: dict of users_card
+    :return: list of telegram_id in users_deck
+    ['telegram_id1', 'telegram_id2', ...]
+    '''
     file_id = []        
     for item in users_deck.values():
         file_id.append(item['telegram_id'])
     return file_id
 
 
+def get_media(users_deck):
+    ''':users_deck: dict of users_card
+    :return: list of InputMediaPhoto(telegram_id) in users_deck
+    [InputMediaPhoto('telegram_id1'), InputMediaPhoto(''telegram_id2'), ...]
+    '''
+    # get list of telegram_id ['telegram_id1', 'telegram_id2',]
+    photo = get_telegram_id_from_user_deck(users_deck)
+    # add
+    media = []
+    for item in photo:
+        media.append(InputMediaPhoto(item))
+    return media
 
 
 
@@ -142,42 +158,34 @@ def start_game(update, context):
     
     # cards in user's hands:
     users_deck = {}
-# TODO: ИЗМЕНИТЬ ЗНАЧЕНИЕ RANGE НА 2!!!
     for _ in range(2):
         users_deck = add_newcard(users_deck, deck) 
-    # print(users_deck.values())
- 
-    # cards = list(users_deck.values())[0]
-    # print(cards) #it's a list obj. ['1', '2']
-    
-    # send cards to user
-    # update.message.reply_text(text='Your cards:', reply_markup=my_keyboard())
 
-# TODO: достать значения telegram_id из users_deck и отправить карты пользователю
-# TODO: сделал так чтобы отправлялась пока 1 карта
+    # user_data is dict. It's empty here
+    user_data = context.user_data
+    # insert deck and users_deck in user_data
+    user_data['deck'] = deck
+    user_data['users_deck'] = users_deck
+
 # TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
-    # send picture:
     chat_id = update.effective_chat.id
-    # photo = cards.get('telegram_id')
-    photo = get_telegram_id_from_user_deck(users_deck)
-    print('photo:')
-    print(photo)
-    
-    # делаем список медиа с telegram_id для отправки нескольких файлов
-    media = []
-    for item in photo:
-        media.append(InputMediaPhoto(item))
 
-    # отправляем 1-ую фотку:
-    # context.bot.send_photo(chat_id=chat_id, photo=photo[0])
-    # # отправляем 2-ую фотку:
-    # context.bot.send_photo(chat_id=chat_id, photo=photo[1])
-
+    # get media from users_deck
+    media = get_media(users_deck)
     # отправляем медиа группу(несколько фоток сразу)
     try:
+        # send group of photo:
         context.bot.send_media_group(chat_id=chat_id, media=media)
+        # send message with new keyboard
+        context.bot.send_message(chat_id= chat_id, 
+                    text='Want another card?', reply_markup=game_keyboard())
     except TelegramError:
+        # send message to user that something went wrong
+        text = 'Something went wrong. Try again.'
+        context.bot.send_message(chat_id= chat_id, 
+                    text=text, reply_markup=my_keyboard())
         print('TelegramError')
+        return ConversationHandler.END
     return 'GAME'
 
 
@@ -186,35 +194,33 @@ def start_game(update, context):
 
 
 # TODO: сделать функцию игры(но после разборок с функцией start_game)
-def game(users_deck, deck):
-    for _ in range(2):
-        users_deck = add_newcard(users_deck, deck) 
+def game(update, context):
+    print('GAME')
+    # user_data is dict
+    user_data = context.user_data
+    # insert deck and users_deck in user_data
+    deck = user_data['deck']
+    users_deck = user_data['users_deck']
+    
+    # add card in users_deck
+    users_deck = add_newcard(users_deck, deck) 
 
-# FIXME: cod below is needed to fix
-    while True:
-        points = summ_card(users_deck)
-        print("Your summ = ", points)
+# TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
+    chat_id = update.effective_chat.id
 
-        if points == 21:
-            print('Congratulation you win!')
-            break
-        elif points > 21:
-            print('You loose')
-            break
-        else:
-            print('Do you want to get one more card?')
-            print('Enter 1 for YES, 2 for NO')
-            answer = enter_answer()
-            if answer == 1:
-                users_deck = add_newcard(users_deck, deck)
-                print_cards(users_deck)
-                continue
-            elif answer == 2:
-                print_cards(users_deck)
-                print('Your summ = {points}'.format(points=points))
-                break
-            else:
-                break
+    # get media from users_deck
+    media = get_media(users_deck)
+    # отправляем медиа группу(несколько фоток сразу)
+    try:
+        context.bot.send_media_group(chat_id=chat_id, media=media)
+    except TelegramError:
+        # send message to user that something went wrong
+        text = 'Something went wrong. Try again.'
+        context.bot.send_message(chat_id= chat_id, 
+                    text=text, reply_markup=my_keyboard())
+        print('TelegramError')
+        return ConversationHandler.END
+    return 'GAME'
 
-    lider(points)        
+    # lider(points)        
 

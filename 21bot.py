@@ -10,7 +10,7 @@ import settings
 from keyboard import my_keyboard, game_keyboard
 
 from twentyone_logic import start_game, game, stop,\
-                      add_telegram_id_in_sql, enough, try_to_send_photo
+                      add_telegram_id_in_sql, enough
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -56,7 +56,6 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help_command))
-    dp.add_handler(CommandHandler("photo", try_to_send_photo))
     # dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
     dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
 

@@ -21,6 +21,7 @@ import database.work_with_db as database
 
 from mege_images import merge_pic
 
+
 # add random card in users deck. Return list of users card
 def add_newcard(users_deck, deck):
     '''pick card randomly from deck and add it in users deck'''
@@ -69,59 +70,6 @@ def lider(points):
 
     # liderboard.clear()
     liderboard.close()
-
-
-
-
-# TODO: эта функция не нужна, ее можно удалить
-# TODO: сделать проверку отправилась ли фотка в телегу пользователю
-def try_to_send_photo(update, context):
-    print('photo')
-    # photo_id = 'AgACAgIAAxkBAAIN0l9Y9COQs8TZlJE4QZZSq4-CrD5UAAI3rzEbUNnISrXv8Ro0jJWk4k7zly4AAwEAAwIAA3kAA_pfAAIbBA'
-    chat_id = update.effective_chat.id
-    
-    # path = 'database/pictures/6 club.png'
-    path = merge_pic()
-    photo = open(path, 'rb')
-    print(photo)
-    
-
-    # photo2 = open(path, 'rb')
-    # photo_id = InputMediaPhoto(photo2)
-
-    # media = []
-    # for _ in range(2):
-    #     media.append(InputMediaPhoto(photo_id))
-
-    
-     # try to send photo using open
-    try:
-        message = context.bot.send_photo(chat_id=chat_id, photo=photo)   
-        print('photo was sent') 
-
-        # print(message)
-    except TelegramError:
-        print('impossible to send photo')
-   
-
-    # # try to send media using photo_id
-    # try:
-    #     message = context.bot.send_media_group(chat_id=chat_id, media=media)   
-    #     print('media was sent') 
-
-    #     print(message)
-    #     # достаем telegram_id
-    #     for i in message:
-    #         print('\nmessage:')
-    #         print(i['photo'][-1].file_id)
-    # except TelegramError:
-    #     print('impossible to send media')
-        # TODO: здесь нужно код для отправки из файла
-
-
-
-
-
 
 
 
@@ -234,11 +182,14 @@ def start_game(update, context):
     chat_id = update.effective_chat.id
 
     # get media from users_deck
-    media = get_media(users_deck)
+    # media = get_media(users_deck)
+    file_path = merge_pic(users_deck)
+    photo = open(file_path, 'rb') 
+
     # отправляем медиа группу(несколько фоток сразу)
     try:
         # send group of photo:
-        context.bot.send_media_group(chat_id=chat_id, media=media)
+        context.bot.send_photo(chat_id=chat_id, photo=photo)
     except TelegramError:
         # send message to user that something went wrong
         text = 'Something went wrong. Try again.'
@@ -295,11 +246,13 @@ def game(update, context):
     chat_id = update.effective_chat.id
 
     # get media from users_deck
-    media = get_media(users_deck)
+    # media = get_media(users_deck)
+    file_path = merge_pic(users_deck)
+    photo = open(file_path, 'rb') 
 
     try:
         # send group of photo:
-        context.bot.send_media_group(chat_id=chat_id, media=media)
+        context.bot.send_photo(chat_id=chat_id, photo=photo)
         # send message with new keyboard
         text = text_check_points(points)
         keyboard = keyboard_check_points(points)

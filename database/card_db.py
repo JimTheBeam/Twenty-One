@@ -82,10 +82,10 @@ def update_table(conn, file_path, card_key, points):
         print('Database updated successfully')
 
 
-def print_data(cursor):
-    '''Prints all data in the TABLE deck'''
-    for row in cursor.execute('SELECT * FROM deck ORDER BY id'):
-        print(row)
+# def print_data(cursor):
+#     '''Prints all data in the TABLE deck'''
+#     for row in cursor.execute('SELECT * FROM deck ORDER BY id'):
+#         print(row)
 
 
 def get_deck():

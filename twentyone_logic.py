@@ -8,8 +8,6 @@ import shelve
 
 from ruamel.yaml import YAML
 
-
-# FIXME: УДАЛИТЬ ПОТОМ
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
                         ConversationHandler, CallbackQueryHandler
 
@@ -18,8 +16,6 @@ from telegram import ReplyKeyboardMarkup, TelegramError, InputMedia, InputMediaP
 from keyboard import my_keyboard, game_keyboard
 
 import database.card_db as database
-
-
 
 
 # add random card in users deck. Return list of users card
@@ -38,7 +34,6 @@ def add_newcard(users_deck, deck):
     return users_deck
 
 
-# TODO: запилить функцию получения очков из users_deck
 # get users_deck, return summ of the card
 def get_users_deck_points(users_deck):
     '''
@@ -56,7 +51,7 @@ def get_users_deck_points(users_deck):
 
 
 
-
+# TODO: Сделать таблицу лидеров
 # liderboard
 def lider(points):
     # import liderboard from shelve file
@@ -183,7 +178,6 @@ def keyboard_check_points(points):
 
 
 # FIXME: добавить проверку на поинты!
-# FIXME: сделать эту функцию, которая выдает 2 карты пользователю
 def start_game(update, context):
     # get deck from database:
     deck = database.get_deck()
@@ -239,7 +233,7 @@ def start_game(update, context):
 
 
 
-# TODO: сделать функцию игры(но после разборок с функцией start_game)
+
 def game(update, context):
     # user_data is dict
     user_data = context.user_data
@@ -250,21 +244,18 @@ def game(update, context):
     # TODO: добавить проверку по points
     incoming_points = get_users_deck_points(users_deck)
     # check if points are more than 21:
-    if incoming_points == 21:
-        text = text_check_points(incoming_points)
+    text = text_check_points(incoming_points)
+    if incoming_points == 21:      
         update.message.reply_text(text=text, reply_markup=my_keyboard())
         return ConversationHandler.END
     elif incoming_points > 21:
-        text = text_check_points(incoming_points)
         update.message.reply_text(text=text, reply_markup=my_keyboard())
         return ConversationHandler.END
 
-    
     # add card in users_deck
     users_deck = add_newcard(users_deck, deck) 
     # get points:
     points = get_users_deck_points(users_deck)
-
 
 # TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
     chat_id = update.effective_chat.id
@@ -290,12 +281,8 @@ def game(update, context):
     
     # check if points are more than 21:
     if points == 21:
-        # text = 'Congratulation you win!'
-        # update.message.reply_text(text=text, reply_markup=my_keyboard())
         return ConversationHandler.END
     elif points > 21:
-        # text = 'You loose! Your points: {}'.format(points)
-        # update.message.reply_text(text=text, reply_markup=my_keyboard())
         return ConversationHandler.END
 
     return 'GAME'
@@ -303,6 +290,7 @@ def game(update, context):
     # lider(points)        
 
 
+# отрабатывает когда нажата кнопка enough
 def enough(update, context):
     # user_data is dict
     user_data = context.user_data
@@ -316,4 +304,3 @@ def enough(update, context):
     context.bot.send_message(chat_id= chat_id, 
                     text=text, reply_markup=my_keyboard())
     return ConversationHandler.END
-

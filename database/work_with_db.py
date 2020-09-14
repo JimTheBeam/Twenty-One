@@ -1,9 +1,9 @@
 import sqlite3
 
-# TODO: достает таблицу из базы и переделывает её в словарь
+
 def get_all_data():
-    '''Connect to database, get data and create card deck dictionary
-    return card deck dictionary
+    '''Connect to database, get data and pass it further
+    return list of tuple card deck
     function must be called from file: twentyone_logic.py'''
     # Creating connection:
     conn = sqlite3.connect('database/deck.db')
@@ -41,7 +41,7 @@ def convert_deck_in_dict(deck):
 
 
 
-# TODO: записывает telegram_id в таблицу
+# TODO: записывает telegram_id в таблицу deck
 def update_telegram_id(telegram_id, file_path):
     '''update telegram_id in database
     :telegram_id: new telegram_id
@@ -82,3 +82,82 @@ def get_telegram_id(cursor, card_key):
         return new_telegram_id
     except sqlite3.InterfaceError:
         print('Error. Wrong args')
+
+
+
+def get_all_merged_data():
+    '''Connect to database, get data and pass it further
+    return list of tuple card deck
+    function must be called from file: twentyone_logic.py'''
+    # Creating connection:
+    conn = sqlite3.connect('database/deck.db')
+
+    # create object cursor:
+    cursor = conn.cursor()
+    
+    # get data from database:
+    sql = 'SELECT * FROM merged_photo'
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    # data - list of tuple:
+    # [(id, file_path, telegram_id, card_key, create_time), (,,),(,,)]
+
+    # close connection to database
+    conn.close
+    return data
+
+
+
+
+
+
+
+# TODO: сделать функцию записи в базу данных merged_photo
+# TODO: решить что передавать в функцию
+def update_table_merged(conn):
+    '''inserts data in merged_photo'''
+    # open connection to db:
+    conn = sqlite3.connect('database/deck.db')
+    # create object cursor:
+    cursor = conn.cursor()
+
+    insert = (
+        'INSERT INTO merged_photo (file_path, telegram_id, card_key, points)'
+        'VALUES (?, ?, ?, ?)'
+        )
+
+    # get list of file names in the directory /pictures: 
+    # ['pictures/Q spade', 'pictures/6 club', ....]
+    files = os.listdir('pictures/')
+
+    for i in files:
+        # create a data insert for database:
+        file_path = 'database/{}'.format(i)
+        card_key = i.split('.')[0]
+        card_face = i.split(' ')[0]
+        try:
+            points = int(card_face)
+        except ValueError:
+            if card_face == 'Ace':
+                points = 11
+            elif card_face == 'J':
+                points = 2
+            elif card_face == 'Q':
+                points = 3
+            elif card_face == 'K':
+                points = 4
+            else:
+                points = 0
+
+        data = (file_path, card_key, points)
+
+        # try to insert data in the database
+        try:
+            conn.execute(insert, data)
+        except sqlite3.IntegrityError:
+            print('Impossible to insert data in the table')
+        else:
+            # save the data in the db
+            conn.commit()
+            print('Database updated successfully')
+

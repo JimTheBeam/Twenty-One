@@ -2,8 +2,8 @@ import sqlite3
 
 import os
 
-def create_table(conn):
-    '''create a table'''
+def create_table_deck(conn):
+    '''create a table deck'''
     try:
         conn.execute('''
             CREATE TABLE deck
@@ -18,8 +18,24 @@ def create_table(conn):
         print('Table already exist')
 
 
-def update_table(conn):
-    '''inserts data in db'''
+def create_table_merged_photo(conn):
+    '''create a table merged_photo'''
+    try:
+        conn.execute('''
+            CREATE TABLE merged_photo
+            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            file_path   VARCHAR(50)  NOT NULL UNIQUE,
+            telegram_id VARCHAR(150) UNIQUE,
+            card_key    VARCHAR(100)  NOT NULL UNIQUE,
+            points INTEGER NOT NULL CHECK(2<=points AND points<=40),
+            create_time DATETIME DEFAULT CURRENT_TIMESTAMP);''')
+        print('Table merged_photo created successfully')
+    except sqlite3.OperationalError:
+        print('Table already exist')
+
+
+def update_table_deck(conn):
+    '''inserts data in deck'''
     insert = (
         'INSERT INTO deck (file_path, card_key, points)'
         'VALUES (?, ?, ?)'
@@ -61,16 +77,39 @@ def update_table(conn):
             print('Database updated successfully')
 
 
+
+
+
+# def print_data(cursor):
+#     '''Prints all data in the TABLE deck'''
+#     for row in cursor.execute('SELECT * FROM deck ORDER BY id'):
+#         print(row)
+
+
+# def print_data_merge(cursor):
+#     '''Prints all data in the TABLE deck'''
+#     for row in cursor.execute('SELECT * FROM merged_photo ORDER BY id'):
+#         print(row)
+
+
+
 def main():
     # Creating connection:
     conn = sqlite3.connect('deck.db')
     print('Opened database successfully')
 
-    # Create a table:
-    create_table(conn)
+    # Create a table deck:
+    create_table_deck(conn)
 
-    # insert data in the table:
-    update_table(conn)
+    # insert data in the table deck:
+    update_table_deck(conn)
+
+    # Create a table merged_photo:
+    create_table_merged_photo(conn)
+
+    # cursor = conn.cursor()
+    # print_data(cursor)
+    # print_data_merge(cursor)
 
     # close connection
     conn.close()

@@ -11,10 +11,20 @@ def get_file_path(users_deck):
     for item in users_deck.values():
         file_path.append(item['file_path'])
     return file_path
-    
+
+
+def get_card_key_list(users_deck):
+    '''
+    create list card_key of cards in users_deck
+    '''
+    card_key = []
+    for item in users_deck.values():
+        card_key.append(item['card_key'])
+    return card_key
+
+
 
 def merge_pic(users_deck):
-    print('merge_pic')
     # users_deck:
     # {id: {file_path: value, telegram_id: value, card_key: value, create_time: value}}
     
@@ -36,15 +46,11 @@ def merge_pic(users_deck):
     for item in images:
         total_width += item.size[0]
 
-    print('total_width: ', total_width)
-
     # get new_file height
     height = []
     for item in images:
         height.append(item.size[1])
     total_height = max(height)
-
-    print('total_height: ', total_height)
 
     # create new file:
     result = Image.new('RGBA', (total_width, total_height))
@@ -56,10 +62,16 @@ def merge_pic(users_deck):
         result.paste(item, (x_offset, y_offset))
         x_offset += item.size[0]
 
-    file_name = 'merge.png'
-    result_path = 'database/merged_pictures/{}'.format(file_name)
+    # TODO: сделать содание имени файла по слиянию card_key
+    card_key = get_card_key_list(users_deck)
+
+    card_key = '-'.join(card_key)
+
+    result_path = 'database/merged_pictures/{}.png'.format(card_key)
+
     result.save(result_path)
     print(result_path)
+
     return result_path
 
 

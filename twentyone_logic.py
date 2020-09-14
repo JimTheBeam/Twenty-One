@@ -13,7 +13,7 @@ from ruamel.yaml import YAML
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
                         ConversationHandler, CallbackQueryHandler
 
-from telegram import ReplyKeyboardMarkup, TelegramError, InputMedia, InputMediaPhoto
+from telegram import ReplyKeyboardMarkup, TelegramError
 
 from keyboard import my_keyboard, game_keyboard
 
@@ -119,19 +119,7 @@ def get_telegram_id_from_user_deck(users_deck):
     return file_id
 
 
-def get_media(users_deck):
-    '''
-    :users_deck: dict of users_card
-    :return: list of InputMediaPhoto(telegram_id) in users_deck
-    [InputMediaPhoto('telegram_id1'), InputMediaPhoto(''telegram_id2'), ...]
-    '''
-    # get list of telegram_id ['telegram_id1', 'telegram_id2',]
-    photo = get_telegram_id_from_user_deck(users_deck)
-    # add
-    media = []
-    for item in photo:
-        media.append(InputMediaPhoto(item))
-    return media
+
 
 
 def text_check_points(points):
@@ -158,6 +146,10 @@ def keyboard_check_points(points):
     return keyboard
 
 
+
+
+
+
 # FIXME: добавить проверку на поинты!
 def start_game(update, context):
     # get deck from database:
@@ -179,17 +171,17 @@ def start_game(update, context):
     user_data['users_deck'] = users_deck
 
 # TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
+# TODO: добавить добавление склеенной картинки в базу данных
     chat_id = update.effective_chat.id
 
-    # get media from users_deck
-    # media = get_media(users_deck)
+
     file_path = merge_pic(users_deck)
     photo = open(file_path, 'rb') 
 
     # отправляем медиа группу(несколько фоток сразу)
     try:
         # send group of photo:
-        context.bot.send_photo(chat_id=chat_id, photo=photo)
+        message = context.bot.send_photo(chat_id=chat_id, photo=photo)
     except TelegramError:
         # send message to user that something went wrong
         text = 'Something went wrong. Try again.'
@@ -197,6 +189,13 @@ def start_game(update, context):
                     text=text, reply_markup=my_keyboard())
         print('TelegramError')
         return ConversationHandler.END
+
+    # TODO: функцию создания списка
+    # TODO: что мы должны передать file_path, telegram_id, card_key, points
+    # this is telegram_id
+    print(message['photo'][-1]['file_id'])
+
+
 
     # check points with 21 and send message to user:
     text = text_check_points(points)
@@ -212,6 +211,8 @@ def start_game(update, context):
         context.bot.send_message(chat_id= chat_id, 
                 text=text, reply_markup=game_keyboard())
         return 'GAME'
+
+
 
 
 
@@ -245,8 +246,7 @@ def game(update, context):
 # TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
     chat_id = update.effective_chat.id
 
-    # get media from users_deck
-    # media = get_media(users_deck)
+
     file_path = merge_pic(users_deck)
     photo = open(file_path, 'rb') 
 
@@ -275,6 +275,12 @@ def game(update, context):
     return 'GAME'
 
     # lider(points)        
+
+
+
+
+
+
 
 
 # отрабатывает когда нажата кнопка enough

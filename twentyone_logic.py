@@ -4,8 +4,10 @@ import os
 
 import sqlite3
 
+# it's not needed
 import shelve
 
+# it's not needed
 from ruamel.yaml import YAML
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
@@ -15,8 +17,9 @@ from telegram import ReplyKeyboardMarkup, TelegramError, InputMedia, InputMediaP
 
 from keyboard import my_keyboard, game_keyboard
 
-import database.card_db as database
+import database.work_with_db as database
 
+from mege_images import merge_pic
 
 # add random card in users deck. Return list of users card
 def add_newcard(users_deck, deck):
@@ -74,15 +77,45 @@ def lider(points):
 # TODO: сделать проверку отправилась ли фотка в телегу пользователю
 def try_to_send_photo(update, context):
     print('photo')
-    photo_id = 'AgACAgIAAxkBAAIN0l9Y9COQs8TZlJE4QZZSq4-CrD5UAAI3rzEbUNnISrXv8Ro0jJWk4k7zly4AAwEAAwIAA3kAA_pfAAIbBA'
+    # photo_id = 'AgACAgIAAxkBAAIN0l9Y9COQs8TZlJE4QZZSq4-CrD5UAAI3rzEbUNnISrXv8Ro0jJWk4k7zly4AAwEAAwIAA3kAA_pfAAIbBA'
     chat_id = update.effective_chat.id
+    
+    # path = 'database/pictures/6 club.png'
+    path = merge_pic()
+    photo = open(path, 'rb')
+    print(photo)
+    
 
-    # try to send photo using photo_id
+    # photo2 = open(path, 'rb')
+    # photo_id = InputMediaPhoto(photo2)
+
+    # media = []
+    # for _ in range(2):
+    #     media.append(InputMediaPhoto(photo_id))
+
+    
+     # try to send photo using open
     try:
-        context.bot.send_photo(chat_id=chat_id,photo=photo_id)   
+        message = context.bot.send_photo(chat_id=chat_id, photo=photo)   
         print('photo was sent') 
+
+        # print(message)
     except TelegramError:
         print('impossible to send photo')
+   
+
+    # # try to send media using photo_id
+    # try:
+    #     message = context.bot.send_media_group(chat_id=chat_id, media=media)   
+    #     print('media was sent') 
+
+    #     print(message)
+    #     # достаем telegram_id
+    #     for i in message:
+    #         print('\nmessage:')
+    #         print(i['photo'][-1].file_id)
+    # except TelegramError:
+    #     print('impossible to send media')
         # TODO: здесь нужно код для отправки из файла
 
 
@@ -180,7 +213,8 @@ def keyboard_check_points(points):
 # FIXME: добавить проверку на поинты!
 def start_game(update, context):
     # get deck from database:
-    deck = database.get_deck()
+    # deck = database.get_deck()
+    deck = database.convert_deck_in_dict(database.get_all_data())
     
     # cards in user's hands:
     users_deck = {}

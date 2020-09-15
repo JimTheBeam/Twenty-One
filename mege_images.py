@@ -70,7 +70,7 @@ def merge_pic(users_deck):
     result_path = 'database/merged_pictures/{}.png'.format(card_key)
 
     result.save(result_path)
-    print(result_path)
+    # print(result_path)
 
     return result_path
 

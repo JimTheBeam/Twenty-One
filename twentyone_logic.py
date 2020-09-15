@@ -144,13 +144,14 @@ def keyboard_check_points(points):
     return keyboard
 
 
-# TODO:
-# TODO:
-# TODO:
-# TODO:
-# TODO:
-def game_logic(update, context, n, users_deck, deck):
 
+# TODO:
+# TODO:
+def game_logic(update, context):
+    # user_data is dict
+    user_data = context.user_data
+    # insert deck and users_deck in user_data
+    users_deck = user_data['users_deck']
     # calculate points:
     points = get_users_deck_points(users_deck)
 
@@ -173,7 +174,8 @@ def game_logic(update, context, n, users_deck, deck):
                     text=text, reply_markup=my_keyboard())
         print('TelegramError')
         # FIXME: НУЖНО ПОДУМАТЬ О ВОЗВРАТЕ!!!
-        return ConversationHandler.END
+        points = 100
+        return points
 
     # TODO: функцию создания списка
     # TODO: что мы должны передать file_path, telegram_id, card_key, points
@@ -190,11 +192,8 @@ def game_logic(update, context, n, users_deck, deck):
     context.bot.send_message(chat_id=chat_id,
                 text=text, reply_markup=keyboard)
 
-    # check if points are more than 21:
-    if points >= 21:
-        return ConversationHandler.END
-    else:
-        return 'GAME'
+    return points
+
 
 
 
@@ -236,51 +235,13 @@ def start_game(update, context):
     user_data['users_deck'] = users_deck
 
     # FIXME: СЮДА ВСТАВЛЯЕТСЯ ФУНКЦИЯ ГЕЙМ ЛОГИК
-    # get points:
-    points = get_users_deck_points(users_deck)
+    points = game_logic(update, context)
 
-# TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
-# TODO: добавить добавление склеенной картинки в базу данных
-    chat_id = update.effective_chat.id
-
-
-    file_path = merge_pic(users_deck)
-    photo = open(file_path, 'rb') 
-
-    # отправляем медиа группу(несколько фоток сразу)
-    try:
-        # send group of photo:
-        message = context.bot.send_photo(chat_id=chat_id, photo=photo)
-    except TelegramError:
-        # send message to user that something went wrong
-        text = 'Something went wrong. Try again.'
-        context.bot.send_message(chat_id= chat_id, 
-                    text=text, reply_markup=my_keyboard())
-        print('TelegramError')
-        return ConversationHandler.END
-
-    # TODO: функцию создания списка
-    # TODO: что мы должны передать file_path, telegram_id, card_key, points
-    # this is telegram_id
-    print(message['photo'][-1]['file_id'])
-
-
-
-    # check points with 21 and send message to user:
-    text = text_check_points(points)
-    if points == 21:      
-        context.bot.send_message(chat_id= chat_id, 
-                text=text, reply_markup=my_keyboard())
-        return ConversationHandler.END
-    elif points > 21:
-        context.bot.send_message(chat_id= chat_id, 
-                text=text, reply_markup=my_keyboard())
+    # check if points are more than 21:
+    if points >= 21:
         return ConversationHandler.END
     else:
-        context.bot.send_message(chat_id= chat_id, 
-                text=text, reply_markup=game_keyboard())
         return 'GAME'
-
 
 
 
@@ -300,42 +261,13 @@ def game(update, context):
     users_deck = add_newcard(users_deck, deck) 
 
     # FIXME: СЮДА ВСТАВЛЯЕТСЯ ФУНКЦИЯ ГЕЙМ ЛОГИК
-    # get points:
-    points = get_users_deck_points(users_deck)
-
-# TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
-    chat_id = update.effective_chat.id
-
-
-    file_path = merge_pic(users_deck)
-    photo = open(file_path, 'rb') 
-
-
-    text = text_check_points(points)
-    keyboard = keyboard_check_points(points)
-    try:
-        # send group of photo:
-        context.bot.send_photo(chat_id=chat_id, photo=photo)
-        # send message with new keyboard
-        context.bot.send_message(chat_id=chat_id, 
-                    text=text, reply_markup=keyboard)
-    except TelegramError:
-        # send message to user that something went wrong
-        text = 'Something went wrong. Try again.'
-        context.bot.send_message(chat_id= chat_id, 
-                    text=text, reply_markup=my_keyboard())
-        print('TelegramError')
-        return ConversationHandler.END
-    
-
-
+    points = game_logic(update, context)
 
     # check if points are more than 21:
     if points >= 21:
         return ConversationHandler.END
     else:
         return 'GAME'
-
     # lider(points)        
 
 

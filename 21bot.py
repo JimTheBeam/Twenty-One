@@ -58,7 +58,7 @@ def main():
     dp.add_handler(CommandHandler("help", help_command))
     # dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
     dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
-    dp.add_handler(MessageHandler(Filters.regex('^(Quit game)$'), stop))
+    # dp.add_handler(MessageHandler(Filters.regex('^(Quit game)$'), stop))
 
 
     game_handler = ConversationHandler(

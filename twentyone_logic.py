@@ -137,13 +137,79 @@ def text_check_points(points):
 def keyboard_check_points(points):
     '''check if points higher 21
     return keyboard for message to user'''
-    if points == 21:
-        keyboard = my_keyboard()
-    elif points > 21:
+    if points >= 21:
         keyboard = my_keyboard()
     else:
         keyboard = game_keyboard()
     return keyboard
+
+
+# TODO:
+# TODO:
+# TODO:
+# TODO:
+# TODO:
+def game_logic(update, context, n, users_deck, deck):
+
+    # calculate points:
+    points = get_users_deck_points(users_deck)
+
+# TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
+# TODO: добавить добавление склеенной картинки в базу данных
+    chat_id = update.effective_chat.id
+
+    # create a file with merged picture:
+    file_path = merge_pic(users_deck)
+    photo = open(file_path, 'rb') 
+
+    # отправляем фото пользователю:
+    try:
+        # send group of photo:
+        message = context.bot.send_photo(chat_id=chat_id, photo=photo)
+    except TelegramError:
+        # send message to user that something went wrong
+        text = 'Something went wrong. Try again.'
+        context.bot.send_message(chat_id= chat_id, 
+                    text=text, reply_markup=my_keyboard())
+        print('TelegramError')
+        # FIXME: НУЖНО ПОДУМАТЬ О ВОЗВРАТЕ!!!
+        return ConversationHandler.END
+
+    # TODO: функцию создания списка
+    # TODO: что мы должны передать file_path, telegram_id, card_key, points
+    # this is telegram_id
+    print(message['photo'][-1]['file_id'])
+
+
+    # TODO: ПЕРЕДЕЛАТЬ РЕТУРНЫ
+    # check points with 21 and send message to user:
+    text = text_check_points(points)
+    keyboard = keyboard_check_points(points)
+
+    # отправляем соощение пользователю:
+    context.bot.send_message(chat_id=chat_id,
+                text=text, reply_markup=keyboard)
+
+    # check if points are more than 21:
+    if points >= 21:
+        return ConversationHandler.END
+    else:
+        return 'GAME'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -158,17 +224,20 @@ def start_game(update, context):
     
     # cards in user's hands:
     users_deck = {}
-    for _ in range(2):
-        users_deck = add_newcard(users_deck, deck) 
 
-    # get points:
-    points = get_users_deck_points(users_deck)
+    # add cards in users_deck
+    for _ in range(2):
+        users_deck = add_newcard(users_deck, deck)
 
     # user_data is dict. It's empty here
     user_data = context.user_data
     # insert deck and users_deck in user_data
     user_data['deck'] = deck
     user_data['users_deck'] = users_deck
+
+    # FIXME: СЮДА ВСТАВЛЯЕТСЯ ФУНКЦИЯ ГЕЙМ ЛОГИК
+    # get points:
+    points = get_users_deck_points(users_deck)
 
 # TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
 # TODO: добавить добавление склеенной картинки в базу данных
@@ -227,19 +296,10 @@ def game(update, context):
     deck = user_data['deck']
     users_deck = user_data['users_deck']
 
-    # TODO: добавить проверку по points
-    incoming_points = get_users_deck_points(users_deck)
-    # check if points are more than 21:
-    text = text_check_points(incoming_points)
-    if incoming_points == 21:      
-        update.message.reply_text(text=text, reply_markup=my_keyboard())
-        return ConversationHandler.END
-    elif incoming_points > 21:
-        update.message.reply_text(text=text, reply_markup=my_keyboard())
-        return ConversationHandler.END
-
     # add card in users_deck
     users_deck = add_newcard(users_deck, deck) 
+
+    # FIXME: СЮДА ВСТАВЛЯЕТСЯ ФУНКЦИЯ ГЕЙМ ЛОГИК
     # get points:
     points = get_users_deck_points(users_deck)
 
@@ -250,13 +310,14 @@ def game(update, context):
     file_path = merge_pic(users_deck)
     photo = open(file_path, 'rb') 
 
+
+    text = text_check_points(points)
+    keyboard = keyboard_check_points(points)
     try:
         # send group of photo:
         context.bot.send_photo(chat_id=chat_id, photo=photo)
         # send message with new keyboard
-        text = text_check_points(points)
-        keyboard = keyboard_check_points(points)
-        context.bot.send_message(chat_id= chat_id, 
+        context.bot.send_message(chat_id=chat_id, 
                     text=text, reply_markup=keyboard)
     except TelegramError:
         # send message to user that something went wrong
@@ -266,13 +327,14 @@ def game(update, context):
         print('TelegramError')
         return ConversationHandler.END
     
-    # check if points are more than 21:
-    if points == 21:
-        return ConversationHandler.END
-    elif points > 21:
-        return ConversationHandler.END
 
-    return 'GAME'
+
+
+    # check if points are more than 21:
+    if points >= 21:
+        return ConversationHandler.END
+    else:
+        return 'GAME'
 
     # lider(points)        
 

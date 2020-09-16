@@ -1,5 +1,3 @@
-from random import choice
-
 import os
 
 import sqlite3
@@ -21,38 +19,8 @@ import database.work_with_db as database
 
 from mege_images import merge_pic
 
-
-# add random card in users deck. Return list of users card
-def add_newcard(users_deck, deck):
-    '''pick card randomly from deck and add it in users deck'''
-    while True:
-        #pick card randomly from deck
-        card = choice(list(deck.items()))
-        # check if card in users_deck:
-        if card[0] in users_deck.keys():
-            continue
-        else:
-            #add card in users_deck
-            users_deck[card[0]] = card[1] 
-            break
-    return users_deck
-
-
-# get users_deck, return summ of the card
-def get_users_deck_points(users_deck):
-    '''
-    :users_deck: dict of users_card
-    :return: int points
-    '''
-    points = 0
-    for item in users_deck.values():
-        points += item['points']
-    return points
-
-
-
-
-
+from users_deck_operation import add_newcard, get_users_deck_points,\
+            create_card_key_from_users_deck
 
 
 # TODO: Сделать таблицу лидеров
@@ -72,54 +40,11 @@ def lider(points):
     liderboard.close()
 
 
-
-
-
 # stops conversation handler and the Game
 def stop(update, context):
     text = 'Game over'
     update.message.reply_text(text=text, reply_markup=my_keyboard())
     return ConversationHandler.END
-
-
-# this func do not needed in the game
-# func updates database
-# TODO: удалить эту функцию и переделать логику отправки файлов
-# TODO: на попытку отправки через telegram_id, если не получилось - отправка через файл
-def add_telegram_id_in_sql(update, context):
-    '''send photos from database file to telegram,
-    get telegram_id and insert them in database'''
-    # create connection to database:
-    conn = sqlite3.connect('database/deck.db')
-    cursor = conn.cursor()
-    # get file_path from database
-    file_path = database.get_column_file_path(cursor)
-    # send photo to user and get telegram_id
-    chat_id = update.effective_chat.id
-    for item in file_path:
-        # send photo:
-        photo = open(item[0], 'rb')
-        mess = context.bot.send_photo(chat_id=chat_id, photo=photo)
-        #get telegram_id:
-        telegram_id = mess.photo[1].file_id
-        # update telegram_id in database
-        database.update_telegram_id(conn, telegram_id, item[0])
-
-
-# TODO: делает список телеграм айди в колоде пользователя
-def get_telegram_id_from_user_deck(users_deck):
-    '''
-    :users_deck: dict of users_card
-    :return: list of telegram_id in users_deck
-    ['telegram_id1', 'telegram_id2', ...]
-    '''
-    file_id = []        
-    for item in users_deck.values():
-        file_id.append(item['telegram_id'])
-    return file_id
-
-
-
 
 
 def text_check_points(points):
@@ -145,6 +70,9 @@ def keyboard_check_points(points):
 
 
 
+
+
+
 # TODO:
 # TODO:
 def game_logic(update, context):
@@ -159,31 +87,50 @@ def game_logic(update, context):
 # TODO: добавить добавление склеенной картинки в базу данных
     chat_id = update.effective_chat.id
 
-    # create a file with merged picture:
-    file_path = merge_pic(users_deck)
-    photo = open(file_path, 'rb') 
 
-    # отправляем фото пользователю:
-    try:
-        # send group of photo:
-        message = context.bot.send_photo(chat_id=chat_id, photo=photo)
-    except TelegramError:
-        # send message to user that something went wrong
-        text = 'Something went wrong. Try again.'
-        context.bot.send_message(chat_id= chat_id, 
-                    text=text, reply_markup=my_keyboard())
-        print('TelegramError')
-        # FIXME: НУЖНО ПОДУМАТЬ О ВОЗВРАТЕ!!!
-        points = 100
-        return points
+    # FIXME: ищем в базе телеграм айди
+    # create card_key name:
+    card_key = create_card_key_from_users_deck(users_deck)
 
-    # TODO: функцию создания списка
-    # TODO: что мы должны передать file_path, telegram_id, card_key, points
-    # this is telegram_id
-    print(message['photo'][-1]['file_id'])
+    # check if database has this card_key
+    request = database.get_merge_telegram_id(card_key)
+    print('request:')
+    print(request)
+
+    # check if there's a telegram_id in database:
+    if not request:
+        print("There'are not telegram_id!!!")
+
+        # create a file with merged picture:
+        file_path = merge_pic(users_deck)
+        photo = open(file_path, 'rb') 
+
+        # send photo to user:
+        try:
+            # send photo:
+            message = context.bot.send_photo(chat_id=chat_id, photo=photo)
+        except TelegramError:
+            # send message to user that something went wrong
+            text = 'Something went wrong. Try again.'
+            context.bot.send_message(chat_id= chat_id, 
+                        text=text, reply_markup=my_keyboard())
+            print('TelegramError')
+            # FIXME: НУЖНО ПОДУМАТЬ О ВОЗВРАТЕ!!!
+            points = 100
+            return points
+
+        # TODO: НУЖНО СДЕЛАТЬ ЗАПИСЬ В БАЗУ ДАННЫХ ЭТОЙ КАРТЫ
+
+        # TODO: функцию создания списка
+        # TODO: что мы должны передать +file_path, +telegram_id, +card_key, +points
+        # this is telegram_id
+        telegram_id = message['photo'][-1]['file_id']
 
 
-    # TODO: ПЕРЕДЕЛАТЬ РЕТУРНЫ
+
+
+
+
     # check points with 21 and send message to user:
     text = text_check_points(points)
     keyboard = keyboard_check_points(points)
@@ -201,21 +148,6 @@ def game_logic(update, context):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# FIXME: добавить проверку на поинты!
 def start_game(update, context):
     # get deck from database:
     # deck = database.get_deck()

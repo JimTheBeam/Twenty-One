@@ -2,26 +2,8 @@ from PIL import Image
 
 import os
 
-
-def get_file_path(users_deck):
-    '''
-    create list file_path of cards in users_deck
-    '''
-    file_path = []
-    for item in users_deck.values():
-        file_path.append(item['file_path'])
-    return file_path
-
-
-def get_card_key_list(users_deck):
-    '''
-    create list card_key of cards in users_deck
-    '''
-    card_key = []
-    for item in users_deck.values():
-        card_key.append(item['card_key'])
-    return card_key
-
+from users_deck_operation import create_card_key_from_users_deck,\
+        get_card_key_list, get_file_path_list
 
 
 def merge_pic(users_deck):
@@ -29,7 +11,7 @@ def merge_pic(users_deck):
     # {id: {file_path: value, telegram_id: value, card_key: value, create_time: value}}
     
     # list of file_path:
-    file_path = get_file_path(users_deck)
+    file_path = get_file_path_list(users_deck)
 
     # open images with Pillow:
     images = []
@@ -61,11 +43,9 @@ def merge_pic(users_deck):
     for item in images:
         result.paste(item, (x_offset, y_offset))
         x_offset += item.size[0]
-
-    # TODO: сделать содание имени файла по слиянию card_key
-    card_key = get_card_key_list(users_deck)
-
-    card_key = '-'.join(card_key)
+    
+    # create name card_key
+    card_key = create_card_key_from_users_deck(users_deck)
 
     result_path = 'database/merged_pictures/{}.png'.format(card_key)
 

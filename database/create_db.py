@@ -86,13 +86,14 @@ def update_table_deck(conn):
 #         print(row)
 
 
-# def print_data_merge(cursor):
-#     '''Prints all data in the TABLE deck'''
-#     for row in cursor.execute('SELECT * FROM merged_photo ORDER BY id'):
-#         print(row)
+def print_data_merge(cursor):
+    '''Prints all data in the TABLE deck'''
+    for row in cursor.execute('SELECT * FROM merged_photo ORDER BY id'):
+        print(row)
 
 
-
+# TODO: переделать создание двух таблиц по отдельности
+# TODO: две таблицы сразу он создать не может
 def main():
     # Creating connection:
     conn = sqlite3.connect('deck.db')
@@ -104,6 +105,7 @@ def main():
     # insert data in the table deck:
     update_table_deck(conn)
 
+    # FIXME: эту таблицу нужно создавать отдельно
     # Create a table merged_photo:
     create_table_merged_photo(conn)
 

@@ -1,6 +1,7 @@
 import sqlite3
 
 
+
 def get_all_data():
     '''Connect to database, get data and pass it further
     return list of tuple card deck
@@ -114,18 +115,19 @@ def get_all_merged_data():
 
 # TODO: сделать функцию записи в базу данных merged_photo
 # TODO: решить что передавать в функцию
-def update_table_merged(conn):
+def update_table_merged(data):
     '''inserts data in merged_photo'''
     # open connection to db:
     conn = sqlite3.connect('database/deck.db')
     # create object cursor:
-    cursor = conn.cursor()
+    # cursor = conn.cursor()
 
     insert = (
         'INSERT INTO merged_photo (file_path, telegram_id, card_key, points)'
         'VALUES (?, ?, ?, ?)'
         )
 
+# TODO: все что ниже не допилено пока!!!!
     # get list of file names in the directory /pictures: 
     # ['pictures/Q spade', 'pictures/6 club', ....]
     files = os.listdir('pictures/')
@@ -160,4 +162,19 @@ def update_table_merged(conn):
             # save the data in the db
             conn.commit()
             print('Database updated successfully')
+
+
+def get_merge_telegram_id(card_key):
+    '''try to get telegram_id with card_key
+    :return: None if not such card_key in database'''
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+    sql = 'SELECT telegram_id FROM merged_photo WHERE card_key=:card_key'
+    try:
+        cursor.execute(sql, {'card_key': card_key})
+    except sqlite3.ProgrammingError as e:
+        print('Error: ', e)
+    data = cursor.fetchone()
+    conn.close()
+    return data
 

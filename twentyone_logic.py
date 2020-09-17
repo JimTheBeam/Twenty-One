@@ -69,12 +69,6 @@ def keyboard_check_points(points):
     return keyboard
 
 
-
-
-
-
-# TODO:
-# TODO:
 def game_logic(update, context):
     # user_data is dict
     user_data = context.user_data
@@ -83,12 +77,11 @@ def game_logic(update, context):
     # calculate points:
     points = get_users_deck_points(users_deck)
 
+
 # TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
 # TODO: добавить добавление склеенной картинки в базу данных
     chat_id = update.effective_chat.id
 
-
-    # FIXME: ищем в базе телеграм айди
     # create card_key name:
     card_key = create_card_key_from_users_deck(users_deck)
 
@@ -99,8 +92,6 @@ def game_logic(update, context):
 
     # check if there's a telegram_id in database:
     if not request:
-        print("There'are not telegram_id!!!")
-
         # create a file with merged picture:
         file_path = merge_pic(users_deck)
         photo = open(file_path, 'rb') 
@@ -125,8 +116,9 @@ def game_logic(update, context):
         database.update_table_merged(file_path, telegram_id, card_key, points)
 
     else:
+        print("Send with telegram_id!!!")
         # send photo with telegram_id from database
-        message = context.bot.send_photo(chat_id=chat_id, photo=request)
+        message = context.bot.send_photo(chat_id=chat_id, photo=request[0])
 
     # check points with 21 and send message to user:
     text = text_check_points(points)
@@ -137,12 +129,6 @@ def game_logic(update, context):
                 text=text, reply_markup=keyboard)
 
     return points
-
-
-
-
-
-
 
 
 def start_game(update, context):
@@ -173,12 +159,6 @@ def start_game(update, context):
         return 'GAME'
 
 
-
-
-
-
-
-
 def game(update, context):
     # user_data is dict
     user_data = context.user_data
@@ -198,12 +178,6 @@ def game(update, context):
     else:
         return 'GAME'
     # lider(points)        
-
-
-
-
-
-
 
 
 # отрабатывает когда нажата кнопка enough

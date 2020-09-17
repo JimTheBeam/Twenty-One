@@ -9,8 +9,7 @@ import settings
 
 from keyboard import my_keyboard, game_keyboard
 
-from twentyone_logic import start_game, game, stop,\
-                      add_telegram_id_in_sql, enough
+from twentyone_logic import start_game, game, stop, enough
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',

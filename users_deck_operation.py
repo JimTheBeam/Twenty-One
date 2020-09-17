@@ -1,7 +1,6 @@
 from random import choice
 
 
-
 # add random card in users deck. Return list of users card
 def add_newcard(users_deck, deck):
     '''pick card randomly from deck and add it in users deck'''

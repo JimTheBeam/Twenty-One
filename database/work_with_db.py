@@ -115,7 +115,7 @@ def get_all_merged_data():
 
 # TODO: сделать функцию записи в базу данных merged_photo
 # TODO: решить что передавать в функцию
-def update_table_merged(data):
+def update_table_merged(file_path, telegram_id, card_key, points):
     '''inserts data in merged_photo'''
     # open connection to db:
     conn = sqlite3.connect('database/deck.db')
@@ -127,41 +127,17 @@ def update_table_merged(data):
         'VALUES (?, ?, ?, ?)'
         )
 
-# TODO: все что ниже не допилено пока!!!!
-    # get list of file names in the directory /pictures: 
-    # ['pictures/Q spade', 'pictures/6 club', ....]
-    files = os.listdir('pictures/')
-
-    for i in files:
-        # create a data insert for database:
-        file_path = 'database/{}'.format(i)
-        card_key = i.split('.')[0]
-        card_face = i.split(' ')[0]
-        try:
-            points = int(card_face)
-        except ValueError:
-            if card_face == 'Ace':
-                points = 11
-            elif card_face == 'J':
-                points = 2
-            elif card_face == 'Q':
-                points = 3
-            elif card_face == 'K':
-                points = 4
-            else:
-                points = 0
-
-        data = (file_path, card_key, points)
-
-        # try to insert data in the database
-        try:
-            conn.execute(insert, data)
-        except sqlite3.IntegrityError:
-            print('Impossible to insert data in the table')
-        else:
-            # save the data in the db
-            conn.commit()
-            print('Database updated successfully')
+    # TODO: все что ниже не допилено пока!!!!
+    # try to insert data in the database
+    data = (file_path, telegram_id, card_key, points)
+    try:
+        conn.execute(insert, data)
+    except sqlite3.IntegrityError:
+        print('Impossible to insert data in the table')
+    else:
+        # save the data in the db
+        conn.commit()
+        print('Database updated successfully')
 
 
 def get_merge_telegram_id(card_key):

@@ -115,21 +115,18 @@ def game_logic(update, context):
             context.bot.send_message(chat_id= chat_id, 
                         text=text, reply_markup=my_keyboard())
             print('TelegramError')
-            # FIXME: НУЖНО ПОДУМАТЬ О ВОЗВРАТЕ!!!
             points = 100
             return points
 
-        # TODO: НУЖНО СДЕЛАТЬ ЗАПИСЬ В БАЗУ ДАННЫХ ЭТОЙ КАРТЫ
-
-        # TODO: функцию создания списка
-        # TODO: что мы должны передать +file_path, +telegram_id, +card_key, +points
         # this is telegram_id
         telegram_id = message['photo'][-1]['file_id']
 
+        # update database, table merged_photo
+        database.update_table_merged(file_path, telegram_id, card_key, points)
 
-
-
-
+    else:
+        # send photo with telegram_id from database
+        message = context.bot.send_photo(chat_id=chat_id, photo=request)
 
     # check points with 21 and send message to user:
     text = text_check_points(points)

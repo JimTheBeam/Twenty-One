@@ -24,9 +24,9 @@ def create_table_merged_photo(conn):
         conn.execute('''
             CREATE TABLE merged_photo
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_path   VARCHAR(50)  NOT NULL UNIQUE,
+            file_path   VARCHAR(200)  NOT NULL UNIQUE,
             telegram_id VARCHAR(150) UNIQUE,
-            card_key    VARCHAR(100)  NOT NULL UNIQUE,
+            card_key    VARCHAR(150)  NOT NULL UNIQUE,
             points INTEGER NOT NULL CHECK(2<=points AND points<=40),
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP);''')
         print('Table merged_photo created successfully')

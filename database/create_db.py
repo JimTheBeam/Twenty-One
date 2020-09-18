@@ -2,6 +2,8 @@ import sqlite3
 
 import os
 
+from work_with_db import create_trigger_liderboard
+
 def create_table_deck(conn):
     '''create a table deck'''
     try:
@@ -96,9 +98,6 @@ def update_table_deck(conn):
             print('Database updated successfully')
 
 
-
-
-
 # def print_data(cursor):
 #     '''Prints all data in the TABLE deck'''
 #     for row in cursor.execute('SELECT * FROM deck ORDER BY id'):
@@ -139,7 +138,8 @@ def main():
     # close connection
     conn.close()
 
-
+    # create trigger
+    create_trigger_liderboard()
 
 
 

@@ -128,6 +128,7 @@ def update_table_merged(file_path, telegram_id, card_key, points):
         # save the data in the db
         conn.commit()
         print('Database updated successfully')
+        conn.close()
 
 
 def get_merge_telegram_id(card_key):
@@ -143,4 +144,28 @@ def get_merge_telegram_id(card_key):
     data = cursor.fetchone()
     conn.close()
     return data
+
+
+def create_trigger_liderboard():
+    '''create trigger update_time in table liderboard'''
+    conn = sqlite3.connect('deck.db')
+    cursor = conn.cursor()
+    sql = '''CREATE TRIGGER t_UpdateLastTime  
+            AFTER   
+            UPDATE  
+            ON liderboard
+            FOR EACH ROW   
+            WHEN NEW.update_time <= OLD.update_time  
+            BEGIN  
+            update liderboard set update_time=CURRENT_TIMESTAMP where id=OLD.id;  
+            END'''
+    print('Trigger created successfully')
+    try:
+        cursor.execute(sql)
+    except sqlite3.OperationalError:
+        print('Impossible to create a trigger')
+    
+    conn.commit()
+    conn.close()
+
 

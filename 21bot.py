@@ -44,6 +44,11 @@ Aces valued at 11'''
     update.message.reply_text(text)
 
 
+def wrong(update, context):
+    text = "I don't understand you. Try something else."
+    update.message.reply_text(text, reply_markup=my_keyboard())
+
+
 def main():
     """Start the bot."""
     updater = Updater(settings.API_KEY, use_context=True)
@@ -69,6 +74,7 @@ def main():
             )
     dp.add_handler(game_handler)
 
+    dp.add_handler(MessageHandler(Filters.all, wrong))
     # Start the Bot
     updater.start_polling()
     updater.idle()

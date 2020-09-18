@@ -2,12 +2,6 @@ import os
 
 import sqlite3
 
-# it's not needed
-import shelve
-
-# it's not needed
-from ruamel.yaml import YAML
-
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
                         ConversationHandler, CallbackQueryHandler
 
@@ -25,19 +19,19 @@ from users_deck_operation import add_newcard, get_users_deck_points,\
 
 # TODO: Сделать таблицу лидеров
 # liderboard
-def lider(points):
+# def lider(points):
     # import liderboard from shelve file
-    liderboard = shelve.open('liderboard')
+    # liderboard = shelve.open('liderboard')
     
-    name = input('Enter your name: ')
-    liderboard[name] = str(points)
+    # name = input('Enter your name: ')
+    # liderboard[name] = str(points)
 
-    print('liderborad')
-    for item in liderboard.items():
-        print(item)
+    # print('liderborad')
+    # for item in liderboard.items():
+        # print(item)
 
     # liderboard.clear()
-    liderboard.close()
+    # liderboard.close()
 
 
 # stops conversation handler and the Game
@@ -115,9 +109,14 @@ def game_logic(update, context):
         # send photo with telegram_id from database
         message = context.bot.send_photo(chat_id=chat_id, photo=request[0])
 
-    print(message)
+    # print(message)
     print('\nchat:')
     print(message['chat'])
+    # TODO: сохранение в дб
+    # names = ['lex','pex','apex']
+    # snames = json.dumps(names)
+    # print('\njson list:')
+    # print(snames)
 
     # check points with 21 and send message to user:
     text = text_check_points(points)

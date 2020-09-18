@@ -77,9 +77,6 @@ def game_logic(update, context):
     # calculate points:
     points = get_users_deck_points(users_deck)
 
-
-# TODO: добавить проверку отправилась ли фотка!!! если нет, то отправлять из файла
-# TODO: добавить добавление склеенной картинки в базу данных
     chat_id = update.effective_chat.id
 
     # create card_key name:
@@ -111,14 +108,16 @@ def game_logic(update, context):
 
         # this is telegram_id
         telegram_id = message['photo'][-1]['file_id']
-
         # update database, table merged_photo
         database.update_table_merged(file_path, telegram_id, card_key, points)
-
     else:
         print("Send with telegram_id!!!")
         # send photo with telegram_id from database
         message = context.bot.send_photo(chat_id=chat_id, photo=request[0])
+
+    print(message)
+    print('\nchat:')
+    print(message['chat'])
 
     # check points with 21 and send message to user:
     text = text_check_points(points)
@@ -127,7 +126,6 @@ def game_logic(update, context):
     # отправляем соощение пользователю:
     context.bot.send_message(chat_id=chat_id,
                 text=text, reply_markup=keyboard)
-
     return points
 
 

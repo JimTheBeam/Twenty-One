@@ -1,7 +1,5 @@
 import sqlite3
 
-
-
 def get_all_data():
     '''Connect to database, get data and pass it further
     return list of tuple card deck
@@ -38,8 +36,6 @@ def convert_deck_in_dict(deck):
                       'points': item[4],
                       'create_time': item[5]}
     return deck_dict
-
-
 
 
 # TODO: записывает telegram_id в таблицу deck
@@ -85,7 +81,6 @@ def get_telegram_id(cursor, card_key):
         print('Error. Wrong args')
 
 
-
 def get_all_merged_data():
     '''Connect to database, get data and pass it further
     return list of tuple card deck
@@ -106,11 +101,6 @@ def get_all_merged_data():
     # close connection to database
     conn.close
     return data
-
-
-
-
-
 
 
 # TODO: сделать функцию записи в базу данных merged_photo

@@ -44,7 +44,6 @@ Aces valued at 11'''
     update.message.reply_text(text)
 
 
-
 def main():
     """Start the bot."""
     updater = Updater(settings.API_KEY, use_context=True)
@@ -59,7 +58,6 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
     # dp.add_handler(MessageHandler(Filters.regex('^(Quit game)$'), stop))
 
-
     game_handler = ConversationHandler(
             entry_points=[MessageHandler(Filters.regex('^(Play Game!)$'), start_game)],
             states={
@@ -73,7 +71,6 @@ def main():
 
     # Start the Bot
     updater.start_polling()
-
     updater.idle()
 
 

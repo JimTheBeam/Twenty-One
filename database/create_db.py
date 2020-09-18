@@ -13,9 +13,9 @@ def create_table_deck(conn):
             card_key    VARCHAR(15)  NOT NULL UNIQUE,
             points INTEGER NOT NULL CHECK(2<=points AND points<=11),
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP);''')
-        print('Table created successfully')
+        print('Table deck created successfully')
     except sqlite3.OperationalError:
-        print('Table already exist')
+        print('Table deck already exist')
 
 
 def create_table_merged_photo(conn):
@@ -31,8 +31,27 @@ def create_table_merged_photo(conn):
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP);''')
         print('Table merged_photo created successfully')
     except sqlite3.OperationalError:
-        print('Table already exist')
+        print('Table merger_photo already exist')
 
+def create_table_liderboard(conn):
+    '''create a table liderboard'''
+    try:
+        conn.execute('''
+            CREATE TABLE liderboard(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id VARCHAR(50) NOT NULL UNIQUE,
+            username VARCHAR(50) NOT NULL UNIQUE,
+            first_name VARCHAR(50) NOT NULL,
+            last_name VARCHAR(50),
+            points INTEGER NOT NULL CHECK(points <=21),
+            card_key VARCHAR(200) NOT NULL,
+            games_count INTEGER NOT NULL,
+            create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+            update_time DATETIME DEFAULT CURRENT_TIMESTAMP
+            );''')
+        print('Table liderboard created successfully')
+    except sqlite3.OperationalError:
+        print('Table liderboard already exist')
 
 def update_table_deck(conn):
     '''inserts data in deck'''
@@ -108,6 +127,10 @@ def main():
     # FIXME: эту таблицу нужно создавать отдельно
     # Create a table merged_photo:
     create_table_merged_photo(conn)
+
+    # FIXME: эту таблицу нужно создавать отдельно
+    # Create a table liderboard:
+    create_table_liderboard(conn)
 
     # cursor = conn.cursor()
     # print_data(cursor)

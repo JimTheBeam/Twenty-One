@@ -17,22 +17,6 @@ from users_deck_operation import add_newcard, get_users_deck_points,\
             create_card_key_from_users_deck
 
 
-# TODO: Сделать таблицу лидеров
-# liderboard
-# def lider(points):
-    # import liderboard from shelve file
-    # liderboard = shelve.open('liderboard')
-    
-    # name = input('Enter your name: ')
-    # liderboard[name] = str(points)
-
-    # print('liderborad')
-    # for item in liderboard.items():
-        # print(item)
-
-    # liderboard.clear()
-    # liderboard.close()
-
 
 # stops conversation handler and the Game
 def stop(update, context):
@@ -62,8 +46,8 @@ def keyboard_check_points(points):
         keyboard = game_keyboard()
     return keyboard
 
-# TODO: запилить эту функцию!
 def send_data_to_liderboard(chat, points, card_key, user_data):
+    '''add data in table liderboard'''
     user_id = chat['id']
 
     games_count = user_data['games_count_db'] + 1
@@ -147,12 +131,7 @@ def start_game(update, context):
     # cards in user's hands:
     users_deck = {}
 
-    # TODO: добавить поход в базу liderboard с запросом points_db and games_count
-    # TODO: если пользователь первый раз:
-    # TODO: делаем стартовую запись с user_id, user_name, first_name, last_name
-    # TODO: Если он не первый раз:
-    # TODO: получаем из базы значения points_db, games_cont
-    # TODO: записываем значения в user_data
+    # get data about user from message:
     user_id = chat['id']
     username = chat['username']
     first_name = chat['first_name']
@@ -180,7 +159,6 @@ def start_game(update, context):
     # add cards in users_deck
     for _ in range(2):
         users_deck = add_newcard(users_deck, deck)
-
     
     # insert deck and users_deck in user_data
     user_data['deck'] = deck
@@ -197,6 +175,8 @@ def start_game(update, context):
         return ConversationHandler.END
     elif points > 21:
         # add games_count in liderboard
+        games_count = games_count_db + 1
+        database.update_games_count_liderboard(user_id, games_count)
         return ConversationHandler.END
     else:
         return 'GAME'
@@ -210,7 +190,7 @@ def game(update, context):
     users_deck = user_data['users_deck']
 
     chat = update.message['chat']
-
+    user_id = chat['id']
     # add card in users_deck
     users_deck = add_newcard(users_deck, deck) 
 
@@ -222,9 +202,12 @@ def game(update, context):
         card_key = create_card_key_from_users_deck(users_deck)
         
         send_data_to_liderboard(chat, points, card_key, user_data)
-        # TODO: РЕАЛИЗОВАТЬ ЗАПИСЬ В liderboard
         return ConversationHandler.END
     elif points > 21:
+        games_count_db = user_data['games_count_db']
+        # add games_count in liderboard
+        games_count = games_count_db + 1
+        database.update_games_count_liderboard(user_id, games_count)
         return ConversationHandler.END
     else:
         return 'GAME'       

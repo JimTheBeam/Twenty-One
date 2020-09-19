@@ -38,73 +38,6 @@ def convert_deck_in_dict(deck):
     return deck_dict
 
 
-# TODO: записывает telegram_id в таблицу deck
-def update_telegram_id(telegram_id, file_path):
-    '''update telegram_id in database
-    :telegram_id: new telegram_id
-    :file_path: card we update'''
-    conn = sqlite3.connect('database/deck.db')
-    cursor = conn.cursor()
-    data = (telegram_id, file_path)
-    update = '''UPDATE deck 
-                SET telegram_id = ? 
-                WHERE file_path = ?'''
-    try:
-        # try to update telegram_id
-        cursor.execute(update, data)
-        # check if telegram_id was updated
-        if cursor.rowcount < 1:
-            print('telegram_id was not updated')
-        else:
-            conn.commit()
-            print('telegram_id was updated') 
-    except sqlite3.IntegrityError:
-        print('Error Impossible to update telegram_id')
-    conn.close()
-
-
-# TODO: получает телеграм айди из базы
-# TODO: допилить открытие и закрытие базы данных
-# TODO: функция не нужна
-def get_telegram_id(cursor, card_key):
-    '''get telegram_id from database 
-    :cursor: object sqlite
-    :card_key: card_key
-    :return: telegram_id'''
-    select = 'SELECT telegram_id FROM deck WHERE card_key=?'
-    try:
-        cursor.execute(select, ([card_key]))
-        new_telegram_id = cursor.fetchone()[0]
-        print(new_telegram_id)
-        return new_telegram_id
-    except sqlite3.InterfaceError:
-        print('Error. Wrong args')
-
-
-def get_all_merged_data():
-    '''Connect to database, get data and pass it further
-    return list of tuple card deck
-    function must be called from file: twentyone_logic.py'''
-    # Creating connection:
-    conn = sqlite3.connect('database/deck.db')
-
-    # create object cursor:
-    cursor = conn.cursor()
-    
-    # get data from database:
-    sql = 'SELECT * FROM merged_photo'
-    cursor.execute(sql)
-    data = cursor.fetchall()
-    # data - list of tuple:
-    # [(id, file_path, telegram_id, card_key, create_time), (,,),(,,)]
-
-    # close connection to database
-    conn.close
-    return data
-
-
-# TODO: сделать функцию записи в базу данных merged_photo
-# TODO: решить что передавать в функцию
 def update_table_merged(file_path, telegram_id, card_key, points):
     '''inserts data in merged_photo'''
     # open connection to db:
@@ -117,7 +50,6 @@ def update_table_merged(file_path, telegram_id, card_key, points):
         'VALUES (?, ?, ?, ?)'
         )
 
-    # TODO: все что ниже не допилено пока!!!!
     # try to insert data in the database
     data = (file_path, telegram_id, card_key, points)
     try:
@@ -245,6 +177,7 @@ def get_points_liderboard(user_id):
     return data
 
 
+# TODO: it's not needed
 def get_card_key_liderboard(user_id):
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
@@ -293,4 +226,24 @@ def insert_start_data_liderboard(user_id, username, first_name, last_name):
     conn.close()
 
 
+def update_games_count_liderboard(user_id, games_count):
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+    sql = '''UPDATE liderboard
+             SET games_count = ? 
+             WHERE user_id = ?'''
 
+    data = (games_count, user_id)
+
+    try:
+        # try to update telegram_id
+        cursor.execute(sql, data)
+        # check if telegram_id was updated
+        if cursor.rowcount < 1:
+            print('games_count was not updated')
+        else:
+            conn.commit()
+            # print('games_count was updated') 
+    except sqlite3.IntegrityError:
+        print('Error Impossible to update games_count')
+    conn.close()

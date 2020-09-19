@@ -257,3 +257,40 @@ def get_card_key_liderboard(user_id):
     data = cursor.fetchone()
     conn.close()
     return data
+
+
+def get_points_and_games_count_liderboard(user_id):
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+
+    sql = 'SELECT points, games_count FROM liderboard WHERE user_id=:user_id'
+    try:
+        cursor.execute(sql, {'user_id': user_id})
+    except sqlite3.ProgrammingError as e:
+        print('Error: ', e)
+    data = cursor.fetchone()
+    conn.close()
+    return data    
+
+
+def insert_start_data_liderboard(user_id, username, first_name, last_name):
+    '''first insert data about user in table liderboard'''
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+    sql = '''INSERT  INTO liderboard
+            (user_id, username, first_name, last_name, points, card_key, games_count)
+            VALUES(?, ?, ?, ?, ?, ?, ?)'''
+    points = 1
+    card_key = 'start'
+    games_count = 1
+    data = (user_id, username, first_name, last_name, points, card_key, games_count)
+    try:
+        cursor.execute(sql, data)
+    # except sqlite3.IntegrityError:
+    except sqlite3.ProgrammingError:
+        print('Impossible to INSERT data in the table liderboard(start_data)')
+    conn.commit()
+    conn.close()
+
+
+

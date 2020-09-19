@@ -63,29 +63,19 @@ def keyboard_check_points(points):
     return keyboard
 
 # TODO: запилить эту функцию!
-def send_data_to_liderboard(chat, points, card_key):
+def send_data_to_liderboard(chat, points, card_key, user_data):
     user_id = chat['id']
 
-    games_count = database.get_games_count_liderboad(user_id)
-    if games_count == None:
-        games_count = 1
-    else:
-        games_count = games_count[0]
-        games_count += 1
-    
-    # (user_id, username, first_name, last_name,
-            # points, card_key, games_count)
+    games_count = user_data['games_count_db'] + 1
+    points_db = user_data['points_db']
     
     username = chat['username']
     first_name = chat['first_name']
     last_name = chat['last_name']
 
     # check if points in db are higher 
-    if games_count > 1:
-        points_db = database.get_points_liderboard(user_id)[0]
-        if points_db > points:
-            points = points_db
-            card_key = database.get_card_key_liderboard(user_id)[0]
+    if points_db > points:
+        points = points_db
 
     # insert new data in table liderboard
     database.update_table_liderboard(user_id, username, first_name,
@@ -106,11 +96,11 @@ def game_logic(update, context):
     card_key = create_card_key_from_users_deck(users_deck)
 
     # check if database has this card_key
-    request = database.get_merge_telegram_id(card_key)
-    # print('request: ', request)
+    telegram_id_in_db = database.get_merge_telegram_id(card_key)
+    # print('telegram_id_in_db: ', telegram_id_in_db)
 
     # check if there's a telegram_id in database:
-    if not request:
+    if not telegram_id_in_db:
         # create a file with merged picture:
         file_path = merge_pic(users_deck)
         photo = open(file_path, 'rb') 
@@ -135,7 +125,7 @@ def game_logic(update, context):
     else:
         print("Send with telegram_id!!!")
         # send photo with telegram_id from database
-        message = context.bot.send_photo(chat_id=chat_id, photo=request[0])
+        message = context.bot.send_photo(chat_id=chat_id, photo=telegram_id_in_db[0])
 
     # check points with 21 and send message to user:
     text = text_check_points(points)
@@ -149,21 +139,49 @@ def game_logic(update, context):
 
 def start_game(update, context):
     # get deck from database:
-    # deck = database.get_deck()
     deck = database.convert_deck_in_dict(database.get_all_data())
     
     # chat info about user
     chat = update.message['chat']
-     
+
     # cards in user's hands:
     users_deck = {}
+
+    # TODO: добавить поход в базу liderboard с запросом points_db and games_count
+    # TODO: если пользователь первый раз:
+    # TODO: делаем стартовую запись с user_id, user_name, first_name, last_name
+    # TODO: Если он не первый раз:
+    # TODO: получаем из базы значения points_db, games_cont
+    # TODO: записываем значения в user_data
+    user_id = chat['id']
+    username = chat['username']
+    first_name = chat['first_name']
+    last_name = chat['last_name']
+    # try to get points and games_count from liderboard
+    data = database.get_points_and_games_count_liderboard(user_id)
+    # data = (points, games_count)
+    if data == None:
+        # insert data about new user in database liderboard
+        database.insert_start_data_liderboard(user_id, 
+                username, first_name, last_name)
+        points_db = 0
+        games_count_db = 0
+    else:
+        points_db, games_count_db = data
+
+    # user_data is dict. It's empty here
+    user_data = context.user_data
+
+    # insert points_db and games_count in user_data:
+    user_data['points_db'] = points_db
+    user_data['games_count_db'] = games_count_db
+    
 
     # add cards in users_deck
     for _ in range(2):
         users_deck = add_newcard(users_deck, deck)
 
-    # user_data is dict. It's empty here
-    user_data = context.user_data
+    
     # insert deck and users_deck in user_data
     user_data['deck'] = deck
     user_data['users_deck'] = users_deck
@@ -175,10 +193,10 @@ def start_game(update, context):
     if points == 21:
         card_key = create_card_key_from_users_deck(users_deck)
 
-        send_data_to_liderboard(chat, points, card_key)
-        # TODO: РЕАЛИЗОВАТЬ ЗАПИСЬ В liderboard
+        send_data_to_liderboard(chat, points, card_key, user_data)
         return ConversationHandler.END
     elif points > 21:
+        # add games_count in liderboard
         return ConversationHandler.END
     else:
         return 'GAME'
@@ -203,7 +221,7 @@ def game(update, context):
     if points == 21:
         card_key = create_card_key_from_users_deck(users_deck)
         
-        send_data_to_liderboard(chat, points, card_key)
+        send_data_to_liderboard(chat, points, card_key, user_data)
         # TODO: РЕАЛИЗОВАТЬ ЗАПИСЬ В liderboard
         return ConversationHandler.END
     elif points > 21:
@@ -230,6 +248,6 @@ def enough(update, context):
     
     card_key = create_card_key_from_users_deck(users_deck)
         
-    send_data_to_liderboard(chat, points, card_key)
+    send_data_to_liderboard(chat, points, card_key, user_data)
     # TODO: РЕАЛИЗОВАТЬ ЗАПИСЬ В liderboard
     return ConversationHandler.END

@@ -127,7 +127,6 @@ def update_table_merged(file_path, telegram_id, card_key, points):
     else:
         # save the data in the db
         conn.commit()
-        print('Table merged in database updated successfully')
         conn.close()
 
 
@@ -174,7 +173,7 @@ def update_table_liderboard(user_id, username, first_name,
     '''inserts data in table liderboard'''
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
-    print('liderboard connected')
+    
     sql_update = '''UPDATE OR IGNORE liderboard
             SET user_id=:user_id, username=:username, first_name=:first_name,
             last_name=:last_name, points=:points, card_key=:card_key,
@@ -193,15 +192,11 @@ def update_table_liderboard(user_id, username, first_name,
             'card_key': card_key, 
             'games_count': games_count}
 
-
-    print('games_count: ', games_count, type(games_count))
-
     data_insert = (user_id, username, first_name, last_name, 
                     points, card_key, games_count)
 
     try:
         cursor.execute(sql_update, data_update)
-        # print('liderboard UPDATED successfully')
     except sqlite3.IntegrityError:
         print('Impossible to UPDATE data in the table liderboard')
     except sqlite3.OperationalError:
@@ -212,7 +207,6 @@ def update_table_liderboard(user_id, username, first_name,
 
     try:
         cursor.execute(sql_insert, data_insert)
-        # print('liderboard INSERTED successfully')
     except sqlite3.IntegrityError:
         print('Impossible to INSERT data in the table liderboard')
     except sqlite3.OperationalError:
@@ -220,7 +214,6 @@ def update_table_liderboard(user_id, username, first_name,
     else:
         # save the data in the db
         conn.commit()
-        print('Database updated successfully')
         conn.close()
     
 
@@ -229,6 +222,34 @@ def get_games_count_liderboad(user_id):
     cursor = conn.cursor()
     sql = 'SELECT games_count FROM liderboard WHERE user_id=:user_id'
 
+    try:
+        cursor.execute(sql, {'user_id': user_id})
+    except sqlite3.ProgrammingError as e:
+        print('Error: ', e)
+    data = cursor.fetchone()
+    conn.close()
+    return data
+
+
+def get_points_liderboard(user_id):
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+    sql = 'SELECT points FROM liderboard WHERE user_id=:user_id'
+
+    try:
+        cursor.execute(sql, {'user_id': user_id})
+    except sqlite3.ProgrammingError as e:
+        print('Error: ', e)
+    data = cursor.fetchone()
+    conn.close()
+    return data
+
+
+def get_card_key_liderboard(user_id):
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+    sql = 'SELECT card_key FROM liderboard WHERE user_id=:user_id'
+    
     try:
         cursor.execute(sql, {'user_id': user_id})
     except sqlite3.ProgrammingError as e:

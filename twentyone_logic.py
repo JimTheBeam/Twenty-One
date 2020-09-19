@@ -64,11 +64,6 @@ def keyboard_check_points(points):
 
 # TODO: запилить эту функцию!
 def send_data_to_liderboard(chat, points, card_key):
-    # 1) идем в дб и получаем от туда games_count
-    # 2) если NULL назначаем 1
-    # 3) распаковываем chat и получаем значения
-    # 4) записываем новую инфу в базу
-    print("hi, I'm liderboard")
     user_id = chat['id']
 
     games_count = database.get_games_count_liderboad(user_id)
@@ -76,14 +71,21 @@ def send_data_to_liderboard(chat, points, card_key):
         games_count = 1
     else:
         games_count = games_count[0]
+        games_count += 1
     
     # (user_id, username, first_name, last_name,
             # points, card_key, games_count)
     
-    games_count += 1
     username = chat['username']
     first_name = chat['first_name']
     last_name = chat['last_name']
+
+    # check if points in db are higher 
+    if games_count > 1:
+        points_db = database.get_points_liderboard(user_id)[0]
+        if points_db > points:
+            points = points_db
+            card_key = database.get_card_key_liderboard(user_id)[0]
 
     # insert new data in table liderboard
     database.update_table_liderboard(user_id, username, first_name,
@@ -134,15 +136,6 @@ def game_logic(update, context):
         print("Send with telegram_id!!!")
         # send photo with telegram_id from database
         message = context.bot.send_photo(chat_id=chat_id, photo=request[0])
-
-    # print(message)
-    # print('\nchat:')
-    # print(message['chat'])
-    # TODO: сохранение в дб
-    # names = ['lex','pex','apex']
-    # snames = json.dumps(names)
-    # print('\njson list:')
-    # print(snames)
 
     # check points with 21 and send message to user:
     text = text_check_points(points)

@@ -62,6 +62,33 @@ def keyboard_check_points(points):
         keyboard = game_keyboard()
     return keyboard
 
+# TODO: запилить эту функцию!
+def send_data_to_liderboard(chat, points, card_key):
+    # 1) идем в дб и получаем от туда games_count
+    # 2) если NULL назначаем 1
+    # 3) распаковываем chat и получаем значения
+    # 4) записываем новую инфу в базу
+    print("hi, I'm liderboard")
+    user_id = chat['id']
+
+    games_count = database.get_games_count_liderboad(user_id)
+    if games_count == None:
+        games_count = 1
+    else:
+        games_count = games_count[0]
+    
+    # (user_id, username, first_name, last_name,
+            # points, card_key, games_count)
+    
+    games_count += 1
+    username = chat['username']
+    first_name = chat['first_name']
+    last_name = chat['last_name']
+
+    # insert new data in table liderboard
+    database.update_table_liderboard(user_id, username, first_name,
+                            last_name, points, card_key, games_count)
+
 
 def game_logic(update, context):
     # user_data is dict
@@ -78,8 +105,7 @@ def game_logic(update, context):
 
     # check if database has this card_key
     request = database.get_merge_telegram_id(card_key)
-    print('request:')
-    print(request)
+    # print('request: ', request)
 
     # check if there's a telegram_id in database:
     if not request:
@@ -110,8 +136,8 @@ def game_logic(update, context):
         message = context.bot.send_photo(chat_id=chat_id, photo=request[0])
 
     # print(message)
-    print('\nchat:')
-    print(message['chat'])
+    # print('\nchat:')
+    # print(message['chat'])
     # TODO: сохранение в дб
     # names = ['lex','pex','apex']
     # snames = json.dumps(names)
@@ -133,6 +159,9 @@ def start_game(update, context):
     # deck = database.get_deck()
     deck = database.convert_deck_in_dict(database.get_all_data())
     
+    # chat info about user
+    chat = update.message['chat']
+     
     # cards in user's hands:
     users_deck = {}
 
@@ -146,11 +175,17 @@ def start_game(update, context):
     user_data['deck'] = deck
     user_data['users_deck'] = users_deck
 
-    # FIXME: СЮДА ВСТАВЛЯЕТСЯ ФУНКЦИЯ ГЕЙМ ЛОГИК
+    # main func of the game:
     points = game_logic(update, context)
 
     # check if points are more than 21:
-    if points >= 21:
+    if points == 21:
+        card_key = create_card_key_from_users_deck(users_deck)
+
+        send_data_to_liderboard(chat, points, card_key)
+        # TODO: РЕАЛИЗОВАТЬ ЗАПИСЬ В liderboard
+        return ConversationHandler.END
+    elif points > 21:
         return ConversationHandler.END
     else:
         return 'GAME'
@@ -163,18 +198,25 @@ def game(update, context):
     deck = user_data['deck']
     users_deck = user_data['users_deck']
 
+    chat = update.message['chat']
+
     # add card in users_deck
     users_deck = add_newcard(users_deck, deck) 
 
-    # FIXME: СЮДА ВСТАВЛЯЕТСЯ ФУНКЦИЯ ГЕЙМ ЛОГИК
+    # main func of the game:
     points = game_logic(update, context)
 
     # check if points are more than 21:
-    if points >= 21:
+    if points == 21:
+        card_key = create_card_key_from_users_deck(users_deck)
+        
+        send_data_to_liderboard(chat, points, card_key)
+        # TODO: РЕАЛИЗОВАТЬ ЗАПИСЬ В liderboard
+        return ConversationHandler.END
+    elif points > 21:
         return ConversationHandler.END
     else:
-        return 'GAME'
-    # lider(points)        
+        return 'GAME'       
 
 
 # отрабатывает когда нажата кнопка enough
@@ -186,8 +228,15 @@ def enough(update, context):
     chat_id = update.effective_chat.id
 
     points = get_users_deck_points(users_deck)
-    
+
+    chat = update.message['chat']
+
     text = 'Game over! Your points: {}'.format(points)
     context.bot.send_message(chat_id= chat_id, 
                     text=text, reply_markup=my_keyboard())
+    
+    card_key = create_card_key_from_users_deck(users_deck)
+        
+    send_data_to_liderboard(chat, points, card_key)
+    # TODO: РЕАЛИЗОВАТЬ ЗАПИСЬ В liderboard
     return ConversationHandler.END

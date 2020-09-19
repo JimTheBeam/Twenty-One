@@ -104,10 +104,10 @@ def update_table_deck(conn):
 #         print(row)
 
 
-def print_data_merge(cursor):
-    '''Prints all data in the TABLE deck'''
-    for row in cursor.execute('SELECT * FROM merged_photo ORDER BY id'):
-        print(row)
+# def print_data_merge(cursor):
+#     '''Prints all data in the TABLE deck'''
+#     for row in cursor.execute('SELECT * FROM merged_photo ORDER BY id'):
+#         print(row)
 
 
 # TODO: переделать создание двух таблиц по отдельности

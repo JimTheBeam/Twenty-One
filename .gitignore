@@ -8,3 +8,4 @@ db.sql
 database/pictures/
 database/merged_pictures
 trash.py
+database/deck.db

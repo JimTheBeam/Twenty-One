@@ -8,7 +8,7 @@ def create_table_deck(conn):
     '''create a table deck'''
     try:
         conn.execute('''
-            CREATE TABLE deck
+            CREATE TABLE IF NOT EXISTS deck
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
             file_path   VARCHAR(50)  NOT NULL UNIQUE,
             telegram_id VARCHAR(150) UNIQUE,
@@ -24,7 +24,7 @@ def create_table_merged_photo(conn):
     '''create a table merged_photo'''
     try:
         conn.execute('''
-            CREATE TABLE merged_photo
+            CREATE TABLE  IF NOT EXISTS merged_photo
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
             file_path   VARCHAR(200)  NOT NULL UNIQUE,
             telegram_id VARCHAR(150) UNIQUE,
@@ -39,7 +39,7 @@ def create_table_liderboard(conn):
     '''create a table liderboard'''
     try:
         conn.execute('''
-            CREATE TABLE liderboard(
+            CREATE TABLE  IF NOT EXISTS liderboard(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id VARCHAR(50) NOT NULL UNIQUE,
             username VARCHAR(50) NOT NULL UNIQUE,

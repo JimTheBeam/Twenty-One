@@ -9,7 +9,7 @@ import settings
 
 from keyboard import my_keyboard, game_keyboard
 
-from twentyone_logic import start_game, game, stop, enough
+from twentyone_logic import start_game, game, stop, enough, liderboard
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -45,9 +45,15 @@ Aces valued at 11'''
     update.message.reply_text(text)
 
 
+def wrong_in_game(update, context):
+    text = "I don't understand you. Try something else."
+    update.message.reply_text(text, reply_markup=game_keyboard())
+    return 'GAME'
+
 def wrong(update, context):
     text = "I don't understand you. Try something else."
     update.message.reply_text(text, reply_markup=my_keyboard())
+    
 
 
 def main():
@@ -57,12 +63,6 @@ def main():
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help_command))
-    # dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
-    dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
-    # dp.add_handler(MessageHandler(Filters.regex('^(Quit game)$'), stop))
 
     game_handler = ConversationHandler(
             entry_points=[MessageHandler(Filters.regex('^(Play Game!)$'), start_game)],
@@ -71,9 +71,17 @@ def main():
                         MessageHandler(Filters.regex('^(Enough)$'), enough)]
             },
             fallbacks=[MessageHandler(Filters.regex('^(Quit game)$'), stop),
-            CommandHandler('start', start)]
+            MessageHandler(Filters.all, wrong_in_game)]
             )
     dp.add_handler(game_handler)
+
+    # on different commands - answer in Telegram
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("help", help_command))
+    # dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
+    dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
+    dp.add_handler(MessageHandler(Filters.regex('^(Liderboard)$'), liderboard))
+    # dp.add_handler(MessageHandler(Filters.regex('^(Quit game)$'), stop))
 
     dp.add_handler(MessageHandler(Filters.all, wrong))
     # Start the Bot

@@ -17,7 +17,6 @@ from users_deck_operation import add_newcard, get_users_deck_points,\
             create_card_key_from_users_deck
 
 
-
 # stops conversation handler and the Game
 def stop(update, context):
     text = 'Game over'
@@ -155,7 +154,6 @@ def start_game(update, context):
     user_data['points_db'] = points_db
     user_data['games_count_db'] = games_count_db
     
-
     # add cards in users_deck
     for _ in range(2):
         users_deck = add_newcard(users_deck, deck)
@@ -234,3 +232,27 @@ def enough(update, context):
     send_data_to_liderboard(chat, points, card_key, user_data)
 
     return ConversationHandler.END
+
+
+def liderboard(update, context):
+    '''answers when button Liderboard pressed'''
+    # get top 5 from database:
+    top5 = database.get_top5_liderboard()
+    # top5 - list of tuples [(first_name, points, games_count), ..]
+
+    chat_id = update.effective_chat.id
+
+    if top5 == None:
+        text = 'There are no playes yet.\nPlay and be the first!'
+    else:
+        n = 1
+        text_lider = ''
+        for i in top5:
+            first_name = i[0]
+            points = i[1]
+            games_count = i[2]
+            text_line = f'{n}. {first_name} has {points} max points. Played {games_count} times\n'
+            text_lider += text_line
+            n += 1
+        text = 'TOP PLAYERS:\n' + text_lider
+        context.bot.send_message(chat_id=chat_id, text=text)

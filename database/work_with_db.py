@@ -250,3 +250,17 @@ def update_games_count_liderboard(user_id, games_count):
     except sqlite3.IntegrityError:
         print('Error Impossible to update games_count')
     conn.close()
+
+
+def get_top5_liderboard():
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+    sql = '''SELECT first_name, points, games_count
+                FROM liderboard 
+                ORDER BY points DESC, games_count DESC
+                LIMIT 5;
+                '''
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    conn.close()
+    return data

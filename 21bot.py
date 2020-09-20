@@ -36,6 +36,7 @@ def help_command(update, context):
     text = '''The aim is to score exactly twenty-one points \
 or to come as close to twenty-one as possible, \
 based on the card values dealt.
+
 The numeral cards 6 to 10 have their face values,
 Jacks valued at 2,
 Queens valued at 3,

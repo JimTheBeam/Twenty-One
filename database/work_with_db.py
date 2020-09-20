@@ -77,6 +77,7 @@ def get_merge_telegram_id(card_key):
     return data
 
 
+# TODO: эта функция должна быть в создании таблиц
 def create_trigger_liderboard():
     '''create trigger update_time in table liderboard'''
     conn = sqlite3.connect('deck.db')
@@ -149,6 +150,7 @@ def update_table_liderboard(user_id, username, first_name,
         conn.close()
     
 
+# TODO: НЕ НУЖНА!!!!!!!!!!!!!!!!!11
 def get_games_count_liderboad(user_id):
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
@@ -163,6 +165,7 @@ def get_games_count_liderboad(user_id):
     return data
 
 
+# TODO: НЕ НУЖНА!!!!!!!!!!!!!!!!!11
 def get_points_liderboard(user_id):
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()

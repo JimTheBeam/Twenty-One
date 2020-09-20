@@ -232,5 +232,5 @@ def enough(update, context):
     card_key = create_card_key_from_users_deck(users_deck)
         
     send_data_to_liderboard(chat, points, card_key, user_data)
-    # TODO: РЕАЛИЗОВАТЬ ЗАПИСЬ В liderboard
+
     return ConversationHandler.END

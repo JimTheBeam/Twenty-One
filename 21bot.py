@@ -20,6 +20,10 @@ logging.info('bot started')
 logger = logging.getLogger(__name__)
 
 
+# for key in logging.Logger.manager.loggerDict:
+#     print(key)
+
+
 # this func works when command /start
 def start(update, context):
     """Send a message when the command /start is issued."""
@@ -50,11 +54,11 @@ def wrong_in_game(update, context):
     update.message.reply_text(text, reply_markup=game_keyboard())
     return 'GAME'
 
+
 def wrong(update, context):
     text = "I don't understand you. Try something else."
     update.message.reply_text(text, reply_markup=my_keyboard())
     
-
 
 def main():
     """Start the bot."""
@@ -81,7 +85,6 @@ def main():
     # dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
     dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
     dp.add_handler(MessageHandler(Filters.regex('^(Liderboard)$'), liderboard))
-    # dp.add_handler(MessageHandler(Filters.regex('^(Quit game)$'), stop))
 
     dp.add_handler(MessageHandler(Filters.all, wrong))
     # Start the Bot

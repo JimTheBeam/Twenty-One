@@ -45,6 +45,7 @@ def keyboard_check_points(points):
         keyboard = game_keyboard()
     return keyboard
 
+
 def send_data_to_liderboard(chat, points, card_key, user_data):
     '''add data in table liderboard'''
     user_id = chat['id']

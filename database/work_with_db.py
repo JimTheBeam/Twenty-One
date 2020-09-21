@@ -236,11 +236,9 @@ def update_games_count_liderboard(user_id, games_count):
              SET games_count = ? 
              WHERE user_id = ?'''
 
-    data = (games_count, user_id)
-
     try:
         # try to update telegram_id
-        cursor.execute(sql, data)
+        cursor.execute(sql, (games_count, user_id))
         # check if telegram_id was updated
         if cursor.rowcount < 1:
             print('games_count was not updated')

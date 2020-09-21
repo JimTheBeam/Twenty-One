@@ -95,7 +95,7 @@ def game_logic(update, context):
             # send photo:
             message = context.bot.send_photo(chat_id=chat_id, photo=photo)
         except TelegramError as e:
-            logging.error(f"Merged photo wasn't send: {e}")
+            logging.exception(f"Merged photo wasn't send: {e}")
             # send message to user that something went wrong
             text = 'Something went wrong. Try again.'
             context.bot.send_message(chat_id= chat_id, 

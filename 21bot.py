@@ -16,12 +16,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO, filename='bot.log')
 
 logging.info('bot started')
-
 logger = logging.getLogger(__name__)
-
-
-# for key in logging.Logger.manager.loggerDict:
-#     print(key)
 
 
 # this func works when command /start

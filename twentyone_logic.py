@@ -7,6 +7,8 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
 
 from telegram import ReplyKeyboardMarkup, TelegramError
 
+import logging
+
 from keyboard import my_keyboard, game_keyboard
 
 import database.work_with_db as database
@@ -81,7 +83,6 @@ def game_logic(update, context):
 
     # check if database has this card_key
     telegram_id_in_db = database.get_merge_telegram_id(card_key)
-    # print('telegram_id_in_db: ', telegram_id_in_db)
 
     # check if there's a telegram_id in database:
     if not telegram_id_in_db:
@@ -93,12 +94,12 @@ def game_logic(update, context):
         try:
             # send photo:
             message = context.bot.send_photo(chat_id=chat_id, photo=photo)
-        except TelegramError:
+        except TelegramError as e:
+            logging.error(f"Merged photo wasn't send: {e}")
             # send message to user that something went wrong
             text = 'Something went wrong. Try again.'
             context.bot.send_message(chat_id= chat_id, 
                         text=text, reply_markup=my_keyboard())
-            print('TelegramError')
             points = 100
             return points
 
@@ -107,7 +108,7 @@ def game_logic(update, context):
         # update database, table merged_photo
         database.update_table_merged(file_path, telegram_id, card_key, points)
     else:
-        print("Send with telegram_id!!!")
+        logging.info(f'Sending photo with telegram_id: {card_key}')
         # send photo with telegram_id from database
         message = context.bot.send_photo(chat_id=chat_id, photo=telegram_id_in_db[0])
 
@@ -122,6 +123,7 @@ def game_logic(update, context):
 
 
 def start_game(update, context):
+    logging.info('game started')
     # get deck from database:
     deck = database.convert_deck_in_dict(database.get_all_data())
     

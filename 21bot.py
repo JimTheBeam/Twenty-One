@@ -37,6 +37,7 @@ def start(update, context):
 # answers to /help command
 def help_command(update, context):
     """Send a message when the command /help is issued."""
+    logger.info('/help')
     text = '''The aim is to score exactly twenty-one points \
 or to come as close to twenty-one as possible, \
 based on the card values dealt.
@@ -50,12 +51,14 @@ Aces valued at 11'''
 
 
 def wrong_in_game(update, context):
+    logger.info('func wrong_in_game is started')
     text = "I don't understand you. Try something else."
     update.message.reply_text(text, reply_markup=game_keyboard())
     return 'GAME'
 
 
 def wrong(update, context):
+    logger.info('func wrong is started')
     text = "I don't understand you. Try something else."
     update.message.reply_text(text, reply_markup=my_keyboard())
     

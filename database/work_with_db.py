@@ -1,5 +1,7 @@
 import sqlite3
 
+import logging
+
 def get_all_data():
     '''Connect to database, get data and pass it further
     return list of tuple card deck
@@ -54,8 +56,9 @@ def update_table_merged(file_path, telegram_id, card_key, points):
     data = (file_path, telegram_id, card_key, points)
     try:
         conn.execute(insert, data)
+        logging.info(f'table merged_photo updated with new card: {card_key}')
     except sqlite3.IntegrityError:
-        print('Impossible to insert data in the table')
+        logging.error(f'Imposible insert into table merged_photo new card: {card_key}')
     else:
         # save the data in the db
         conn.commit()
@@ -71,7 +74,7 @@ def get_merge_telegram_id(card_key):
     try:
         cursor.execute(sql, {'card_key': card_key})
     except sqlite3.ProgrammingError as e:
-        print('Error: ', e)
+        logging.error(f'Impossible to get telegram_id from merged_photo: {e}')
     data = cursor.fetchone()
     conn.close()
     return data
@@ -91,11 +94,12 @@ def create_trigger_liderboard():
             BEGIN  
             update liderboard set update_time=CURRENT_TIMESTAMP where id=OLD.id;  
             END'''
-    print('Trigger created successfully')
+    logging.info('Trigger created successfully')
     try:
         cursor.execute(sql)
-    except sqlite3.OperationalError:
-        print('Impossible to create a trigger')
+        logging.info('Trigger for table liderboard created successfully.')
+    except sqlite3.OperationalError as e:
+        logging.error(f'Impossible to create a trigger: {e}')
     
     conn.commit()
     conn.close()
@@ -130,20 +134,20 @@ def update_table_liderboard(user_id, username, first_name,
 
     try:
         cursor.execute(sql_update, data_update)
-    except sqlite3.IntegrityError:
-        print('Impossible to UPDATE data in the table liderboard')
-    except sqlite3.OperationalError:
-        print('ERROR! UPDATE sintax is wrong!')
+    except sqlite3.IntegrityError as e:
+        logging.error(f'Impossible to update table liderboard: {e}')
+    except sqlite3.OperationalError as e:
+        logging.error(f'Impossible to update table liderboard. UPDATE sintax is wrong: {e}')
     else:
         # save the data in the db
         conn.commit()
 
     try:
         cursor.execute(sql_insert, data_insert)
-    except sqlite3.IntegrityError:
-        print('Impossible to INSERT data in the table liderboard')
+    except sqlite3.IntegrityError as e:
+        logging.error(f'Impossible to insert data into the table liderboard: {e}')
     except sqlite3.OperationalError:
-        print('ERROR! INSERT sintax is wrong!')
+        logging.error(f'Impossible to insert into table liderboard. INSERT sintax is wrong: {e}')
     else:
         # save the data in the db
         conn.commit()
@@ -159,7 +163,7 @@ def get_games_count_liderboad(user_id):
     try:
         cursor.execute(sql, {'user_id': user_id})
     except sqlite3.ProgrammingError as e:
-        print('Error: ', e)
+        logging.error(f'Impossible to get games_count from liderboard: {e}')
     data = cursor.fetchone()
     conn.close()
     return data
@@ -174,7 +178,7 @@ def get_points_liderboard(user_id):
     try:
         cursor.execute(sql, {'user_id': user_id})
     except sqlite3.ProgrammingError as e:
-        print('Error: ', e)
+        logging.error(f'Impossible to get points from liderboard: {e}')
     data = cursor.fetchone()
     conn.close()
     return data
@@ -189,7 +193,7 @@ def get_card_key_liderboard(user_id):
     try:
         cursor.execute(sql, {'user_id': user_id})
     except sqlite3.ProgrammingError as e:
-        print('Error: ', e)
+        logging.error(f'Impossible to get card_key from liderboard: {e}')
     data = cursor.fetchone()
     conn.close()
     return data
@@ -203,7 +207,7 @@ def get_points_and_games_count_liderboard(user_id):
     try:
         cursor.execute(sql, {'user_id': user_id})
     except sqlite3.ProgrammingError as e:
-        print('Error: ', e)
+        logging.error(f'Impossible to get points and games_count from table liderboard: {e}')
     data = cursor.fetchone()
     conn.close()
     return data    
@@ -223,8 +227,8 @@ def insert_start_data_liderboard(user_id, username, first_name, last_name):
     try:
         cursor.execute(sql, data)
     # except sqlite3.IntegrityError:
-    except sqlite3.ProgrammingError:
-        print('Impossible to INSERT data in the table liderboard(start_data)')
+    except sqlite3.ProgrammingError as e:
+        logging.error(f'Impossible to insert data into the table liderboard(start_data): {e}')
     conn.commit()
     conn.close()
 
@@ -241,12 +245,11 @@ def update_games_count_liderboard(user_id, games_count):
         cursor.execute(sql, (games_count, user_id))
         # check if telegram_id was updated
         if cursor.rowcount < 1:
-            print('games_count was not updated')
+            logging.warning('games_count was not updated')
         else:
             conn.commit()
-            # print('games_count was updated') 
-    except sqlite3.IntegrityError:
-        print('Error Impossible to update games_count')
+    except sqlite3.IntegrityError as e:
+        logging.error(f'Impossible to update games_count table liderboard: {e}')
     conn.close()
 
 

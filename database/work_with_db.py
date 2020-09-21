@@ -80,31 +80,6 @@ def get_merge_telegram_id(card_key):
     return data
 
 
-# TODO: эта функция должна быть в создании таблиц
-def create_trigger_liderboard():
-    '''create trigger update_time in table liderboard'''
-    conn = sqlite3.connect('deck.db')
-    cursor = conn.cursor()
-    sql = '''CREATE TRIGGER t_UpdateLastTime  
-            AFTER   
-            UPDATE  
-            ON liderboard
-            FOR EACH ROW   
-            WHEN NEW.update_time <= OLD.update_time  
-            BEGIN  
-            update liderboard set update_time=CURRENT_TIMESTAMP where id=OLD.id;  
-            END'''
-    logging.info('Trigger created successfully')
-    try:
-        cursor.execute(sql)
-        logging.info('Trigger for table liderboard created successfully.')
-    except sqlite3.OperationalError as e:
-        logging.exception(f'Impossible to create a trigger: {e}')
-    
-    conn.commit()
-    conn.close()
-
-
 def update_table_liderboard(user_id, username, first_name,
                     last_name, points, card_key, games_count):
     '''inserts data in table liderboard'''
@@ -153,51 +128,6 @@ def update_table_liderboard(user_id, username, first_name,
         conn.commit()
         conn.close()
     
-
-# TODO: НЕ НУЖНА!!!!!!!!!!!!!!!!!11
-def get_games_count_liderboad(user_id):
-    conn = sqlite3.connect('database/deck.db')
-    cursor = conn.cursor()
-    sql = 'SELECT games_count FROM liderboard WHERE user_id=:user_id'
-
-    try:
-        cursor.execute(sql, {'user_id': user_id})
-    except sqlite3.ProgrammingError as e:
-        logging.exception(f'Impossible to get games_count from liderboard: {e}')
-    data = cursor.fetchone()
-    conn.close()
-    return data
-
-
-# TODO: НЕ НУЖНА!!!!!!!!!!!!!!!!!11
-def get_points_liderboard(user_id):
-    conn = sqlite3.connect('database/deck.db')
-    cursor = conn.cursor()
-    sql = 'SELECT points FROM liderboard WHERE user_id=:user_id'
-
-    try:
-        cursor.execute(sql, {'user_id': user_id})
-    except sqlite3.ProgrammingError as e:
-        logging.exception(f'Impossible to get points from liderboard: {e}')
-    data = cursor.fetchone()
-    conn.close()
-    return data
-
-
-# TODO: it's not needed
-def get_card_key_liderboard(user_id):
-    conn = sqlite3.connect('database/deck.db')
-    cursor = conn.cursor()
-    sql = 'SELECT card_key FROM liderboard WHERE user_id=:user_id'
-    
-    try:
-        cursor.execute(sql, {'user_id': user_id})
-    except sqlite3.ProgrammingError as e:
-        logging.exception(f'Impossible to get card_key from liderboard: {e}')
-    data = cursor.fetchone()
-    conn.close()
-    return data
-
 
 def get_points_and_games_count_liderboard(user_id):
     conn = sqlite3.connect('database/deck.db')

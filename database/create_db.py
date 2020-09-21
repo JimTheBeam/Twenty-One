@@ -2,7 +2,15 @@ import sqlite3
 
 import os
 
-from work_with_db import create_trigger_liderboard
+import logging
+
+
+# Enable logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+logging.info('Creating database is starting...')
+
 
 def create_table_deck(conn):
     '''create a table deck'''
@@ -15,9 +23,10 @@ def create_table_deck(conn):
             card_key    VARCHAR(15)  NOT NULL UNIQUE,
             points INTEGER NOT NULL CHECK(2<=points AND points<=11),
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP);''')
-        print('Table deck created successfully')
+        logging.warning('Table deck created successfully')
     except sqlite3.OperationalError:
-        print('Table deck already exist')
+        logging.exception('Impossible to create table deck')
+    conn.commit()
 
 
 def create_table_merged_photo(conn):
@@ -31,9 +40,11 @@ def create_table_merged_photo(conn):
             card_key    VARCHAR(150)  NOT NULL UNIQUE,
             points INTEGER NOT NULL CHECK(2<=points AND points<=40),
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP);''')
-        print('Table merged_photo created successfully')
+        logging.warning('Table merged_photo created successfully')
     except sqlite3.OperationalError:
-        print('Table merger_photo already exist')
+        logging.exception('Impossible to create table merged_photo')
+    conn.commit()
+
 
 def create_table_liderboard(conn):
     '''create a table liderboard'''
@@ -51,16 +62,40 @@ def create_table_liderboard(conn):
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
             update_time DATETIME DEFAULT CURRENT_TIMESTAMP
             );''')
-        print('Table liderboard created successfully')
+        logging.warning('Table liderboard created successfully')
     except sqlite3.OperationalError:
-        print('Table liderboard already exist')
+        logging.exception('Impossible to create table liderboard')
+    conn.commit()
+
+
+def create_trigger_liderboard():
+    '''create trigger update_time in table liderboard'''
+    conn = sqlite3.connect('deck.db')
+    cursor = conn.cursor()
+    sql = '''CREATE TRIGGER IF NOT EXISTS t_UpdateLastTime  
+            AFTER   
+            UPDATE  
+            ON liderboard
+            FOR EACH ROW   
+            WHEN NEW.update_time <= OLD.update_time  
+            BEGIN  
+            update liderboard set update_time=CURRENT_TIMESTAMP where id=OLD.id;  
+            END'''
+    try:
+        cursor.execute(sql)
+        logging.info('Trigger for table liderboard created successfully.')
+    except sqlite3.OperationalError as e:
+        logging.exception(f'Impossible to create a trigger: {e}')
+    
+    conn.commit()
+    conn.close()
+
 
 def update_table_deck(conn):
     '''inserts data in deck'''
     insert = (
-        'INSERT INTO deck (file_path, card_key, points)'
-        'VALUES (?, ?, ?)'
-        )
+        'INSERT OR REPLACE INTO deck (file_path, card_key, points)'
+        'VALUES (?, ?, ?)')
 
     # get list of file names in the directory /pictures: 
     # ['pictures/Q spade', 'pictures/6 club', ....]
@@ -91,31 +126,17 @@ def update_table_deck(conn):
         try:
             conn.execute(insert, data)
         except sqlite3.IntegrityError:
-            print('Impossible to insert data in the table')
+            logging.exception(f'Impossible to insert {card_key} into the table deck')
         else:
             # save the data in the db
             conn.commit()
-            print('Database updated successfully')
+            logging.warning(f'Table deck updated successfully with {card_key}')
 
 
-# def print_data(cursor):
-#     '''Prints all data in the TABLE deck'''
-#     for row in cursor.execute('SELECT * FROM deck ORDER BY id'):
-#         print(row)
-
-
-# def print_data_merge(cursor):
-#     '''Prints all data in the TABLE deck'''
-#     for row in cursor.execute('SELECT * FROM merged_photo ORDER BY id'):
-#         print(row)
-
-
-# TODO: переделать создание двух таблиц по отдельности
-# TODO: две таблицы сразу он создать не может
 def main():
     # Creating connection:
     conn = sqlite3.connect('deck.db')
-    print('Opened database successfully')
+    logging.info('Opened database deck.db successfully')
 
     # Create a table deck:
     create_table_deck(conn)
@@ -123,23 +144,19 @@ def main():
     # insert data in the table deck:
     update_table_deck(conn)
 
-    # FIXME: эту таблицу нужно создавать отдельно
     # Create a table merged_photo:
     create_table_merged_photo(conn)
 
-    # FIXME: эту таблицу нужно создавать отдельно
     # Create a table liderboard:
     create_table_liderboard(conn)
-
-    # cursor = conn.cursor()
-    # print_data(cursor)
-    # print_data_merge(cursor)
 
     # close connection
     conn.close()
 
     # create trigger
     create_trigger_liderboard()
+
+    logging.info('Creating database is finished')
 
 
 

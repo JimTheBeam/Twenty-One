@@ -103,7 +103,7 @@ def update_table_deck(conn):
 
     for i in files:
         # create a data insert for database:
-        file_path = 'database/{}'.format(i)
+        file_path = 'database/pictures/{}'.format(i)
         card_key = i.split('.')[0]
         card_face = i.split(' ')[0]
         try:

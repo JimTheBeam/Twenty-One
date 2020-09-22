@@ -1,5 +1,4 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup,\
-                    ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 
 
 # keyboard:

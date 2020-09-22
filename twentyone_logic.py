@@ -3,7 +3,7 @@ import os
 import sqlite3
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
-                        ConversationHandler, CallbackQueryHandler
+                        ConversationHandler
 
 from telegram import ReplyKeyboardMarkup, TelegramError
 
@@ -88,7 +88,20 @@ def game_logic(update, context):
     if not telegram_id_in_db:
         # create a file with merged picture:
         file_path = merge_pic(users_deck)
-        photo = open(file_path, 'rb') 
+        # check if merge_pic
+        if file_path == None:
+            logging.error(f'Func merge_pic returned None! Cards: {card_key}')
+            text = f"Can't send a picture. Your cards: {card_key}, Your points: {points}"
+            context.bot.send_message(text=text, reply_markup=game_keyboard())
+            return points
+        # open file
+        try:
+            photo = open(file_path, 'rb') 
+        except FileNotFoundError:
+            logging.exception(f'game_logic. file not found: {file_path}')
+            text = f"Can't send a picture. Your cards: {card_key}, Your points: {points}"
+            context.bot.send_message(text=text, reply_markup=game_keyboard())
+            return points
 
         # send photo to user:
         try:

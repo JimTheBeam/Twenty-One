@@ -19,13 +19,6 @@ from users_deck_operation import add_newcard, get_users_deck_points,\
             create_card_key_from_users_deck
 
 
-# stops conversation handler and the Game
-def stop(update, context):
-    text = 'Game over'
-    update.message.reply_text(text=text, reply_markup=my_keyboard())
-    return ConversationHandler.END
-
-
 def text_check_points(points):
     '''check if points higher 21
     return text for message to user'''
@@ -129,7 +122,7 @@ def game_logic(update, context):
     text = text_check_points(points)
     keyboard = keyboard_check_points(points)
 
-    # отправляем соощение пользователю:
+    # send message to user:
     context.bot.send_message(chat_id=chat_id,
                 text=text, reply_markup=keyboard)
     return points

@@ -50,7 +50,7 @@ def create_table_liderboard_21(conn):
     '''create a table liderboard_21'''
     try:
         conn.execute('''
-            CREATE TABLE  IF NOT EXISTS liderboard_21(
+            CREATE TABLE  IF NOT EXISTS liderboard_21 (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             chat_id VARCHAR(50) NOT NULL UNIQUE,
             username VARCHAR(50) UNIQUE,
@@ -58,10 +58,11 @@ def create_table_liderboard_21(conn):
             last_name VARCHAR(50),
             nickname VARCHAR(20),
             points INTEGER NOT NULL CHECK(0 <= points <=21),
-            card_key VARCHAR(200) NOT NULL,
+            card_key VARCHAR(200),
             games_count INTEGER NOT NULL,
             win_games_count INTEGER,
             lose_games_count INTEGER,
+            below_21_games_count INTEGER,
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
             update_time DATETIME DEFAULT CURRENT_TIMESTAMP
             );''')
@@ -93,13 +94,14 @@ def create_trigger_liderboard_21():
     conn.commit()
     conn.close()
 
+
 def create_trigger_liderboard_21_count():
     '''create trigger update_time in table liderboard_21'''
     conn = sqlite3.connect('deck.db')
     cursor = conn.cursor()
     sql = '''CREATE TRIGGER IF NOT EXISTS t_UpdateGamesCount  
             AFTER   
-            UPDATE OF win_games_count, lose_games_count
+            UPDATE OF win_games_count, lose_games_count, below_21_games_count
             ON liderboard_21 
             BEGIN  
             update liderboard_21 set games_count=OLD.games_count+1 where id=OLD.id;  
@@ -163,13 +165,17 @@ def chage_table_liderboard():
     # sql = 'AlTER TABLE liderboard_22 RENAME TO liderboard_21'
 
     # sql = 'DROP TABLE liderboard_21'
-    sql = '''UPDATE liderboard_21
-            SET win_games_count = 1,
-            lose_games_count = 2
-            WHERE chat_id = 91343042
-        '''
+    # sql = '''UPDATE liderboard_21
+    #         SET below_21_games_count = 1
+    #         WHERE chat_id = 12345
+    #     '''
+    sql = '''INSERT INTO liderboard_21
+            (chat_id, username, points, games_count)
+            VALUES (?, ?, ?, ?)'''
+    data = (12345, "LEX", 0, 0)
 
-    cursor.execute(sql)
+    cursor.execute(sql, data)
+    # cursor.execute(sql)
     conn.commit()
     conn.close
 

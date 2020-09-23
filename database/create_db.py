@@ -46,46 +46,48 @@ def create_table_merged_photo(conn):
     conn.commit()
 
 
-def create_table_liderboard(conn):
-    '''create a table liderboard'''
+def create_table_liderboard_21(conn):
+    '''create a table liderboard_21'''
     try:
         conn.execute('''
-            CREATE TABLE  IF NOT EXISTS liderboard(
+            CREATE TABLE  IF NOT EXISTS liderboard_21(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id VARCHAR(50) NOT NULL UNIQUE,
-            username VARCHAR(50) NOT NULL UNIQUE,
-            first_name VARCHAR(50) NOT NULL,
+            chat_id VARCHAR(50) NOT NULL UNIQUE,
+            username VARCHAR(50) UNIQUE,
+            first_name VARCHAR(50),
             last_name VARCHAR(50),
-            points INTEGER NOT NULL CHECK(points <=21),
+            points INTEGER NOT NULL CHECK(0 <= points <=21),
             card_key VARCHAR(200) NOT NULL,
             games_count INTEGER NOT NULL,
+            win_games_count INTEGER,
+            lose_games_count INTEGER,
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
             update_time DATETIME DEFAULT CURRENT_TIMESTAMP
             );''')
-        logging.warning('Table liderboard created successfully')
+        logging.warning('Table liderboard_21 created successfully')
     except sqlite3.OperationalError:
-        logging.exception('Impossible to create table liderboard')
+        logging.exception('Impossible to create table liderboard_21')
     conn.commit()
 
 
-def create_trigger_liderboard():
-    '''create trigger update_time in table liderboard'''
+def create_trigger_liderboard_21():
+    '''create trigger update_time in table liderboard_21'''
     conn = sqlite3.connect('deck.db')
     cursor = conn.cursor()
     sql = '''CREATE TRIGGER IF NOT EXISTS t_UpdateLastTime  
             AFTER   
             UPDATE  
-            ON liderboard
+            ON liderboard_21
             FOR EACH ROW   
             WHEN NEW.update_time <= OLD.update_time  
             BEGIN  
-            update liderboard set update_time=CURRENT_TIMESTAMP where id=OLD.id;  
+            update liderboard_21 set update_time=CURRENT_TIMESTAMP where id=OLD.id;  
             END'''
     try:
         cursor.execute(sql)
-        logging.info('Trigger for table liderboard created successfully.')
+        logging.info('Trigger for table liderboard_21 created successfully.')
     except sqlite3.OperationalError as e:
-        logging.exception(f'Impossible to create a trigger: {e}')
+        logging.exception(f'Impossible to create a trigger for liderboard_21: {e}')
     
     conn.commit()
     conn.close()
@@ -133,6 +135,18 @@ def update_table_deck(conn):
             logging.warning(f'Table deck updated successfully with {card_key}')
 
 
+
+def chage_table_liderboard():
+    conn = sqlite3.connect('deck.db')
+    cursor = conn.cursor()
+    sql = 'AlTER TABLE liderboard_22 RENAME TO liderboard_21'
+
+    cursor.execute(sql)
+    conn.commit()
+    conn.close
+
+
+
 def main():
     # Creating connection:
     conn = sqlite3.connect('deck.db')
@@ -148,13 +162,13 @@ def main():
     create_table_merged_photo(conn)
 
     # Create a table liderboard:
-    create_table_liderboard(conn)
+    create_table_liderboard_21(conn)
 
     # close connection
     conn.close()
 
     # create trigger
-    create_trigger_liderboard()
+    create_trigger_liderboard_21()
 
     logging.info('Creating database is finished')
 
@@ -162,3 +176,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # chage_table_liderboard()

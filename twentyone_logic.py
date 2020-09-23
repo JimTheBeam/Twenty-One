@@ -41,9 +41,9 @@ def keyboard_check_points(points):
     return keyboard
 
 
-def send_data_to_liderboard(chat, points, card_key, user_data):
-    '''add data in table liderboard'''
-    user_id = chat['id']
+def send_data_to_liderboard_21(chat, points, card_key, user_data):
+    '''add data in table liderboard_21'''
+    chat_id = chat['id']
 
     games_count = user_data['games_count_db'] + 1
     points_db = user_data['points_db']
@@ -56,8 +56,8 @@ def send_data_to_liderboard(chat, points, card_key, user_data):
     if points_db > points:
         points = points_db
 
-    # insert new data in table liderboard
-    database.update_table_liderboard(user_id, username, first_name,
+    # insert new data in table liderboard_21
+    database.update_table_liderboard_21(chat_id, username, first_name,
                             last_name, points, card_key, games_count)
 
 
@@ -134,22 +134,43 @@ def start_game(update, context):
     deck = database.convert_deck_in_dict(database.get_all_data())
     
     # chat info about user
-    chat = update.message['chat']
+    # chat = update.message['chat']
+    chat = update.message.chat
 
+
+    # TODO: ПРОВЕРИТЬ РАБОТАЕТ ЛИ ЭТО
+    print('update:')
+    print(update)
+    print(type(update))
+    print()
+
+    user = update.effective_user
+    print('user: ')
+    print(user)
+    print()
     # cards in user's hands:
     users_deck = {}
 
     # get data about user from message:
-    user_id = chat['id']
+    chat_id = chat['id']
+    print("chat_id: ", chat_id)
     username = chat['username']
     first_name = chat['first_name']
     last_name = chat['last_name']
-    # try to get points and games_count from liderboard
-    data = database.get_points_and_games_count_liderboard(user_id)
+
+
+
+    username = ''
+    first_name = ''
+
+
+
+    # try to get points and games_count from liderboard_21
+    data = database.get_points_and_games_count_liderboard_21(chat_id)
     # data = (points, games_count)
     if data == None:
-        # insert data about new user in database liderboard
-        database.insert_start_data_liderboard(user_id, 
+        # insert data about new user in database liderboard_21
+        database.insert_start_data_liderboard_21(chat_id, 
                 username, first_name, last_name)
         points_db = 0
         games_count_db = 0
@@ -178,12 +199,12 @@ def start_game(update, context):
     if points == 21:
         card_key = create_card_key_from_users_deck(users_deck)
 
-        send_data_to_liderboard(chat, points, card_key, user_data)
+        send_data_to_liderboard_21(chat, points, card_key, user_data)
         return ConversationHandler.END
     elif points > 21:
-        # add games_count in liderboard
+        # add games_count in liderboard_21
         games_count = games_count_db + 1
-        database.update_games_count_liderboard(user_id, games_count)
+        database.update_games_count_liderboard_21(chat_id, games_count)
         return ConversationHandler.END
     else:
         return 'GAME'
@@ -197,7 +218,7 @@ def game(update, context):
     users_deck = user_data['users_deck']
 
     chat = update.message['chat']
-    user_id = chat['id']
+    chat_id = chat['id']
     # add card in users_deck
     users_deck = add_newcard(users_deck, deck) 
 
@@ -208,13 +229,13 @@ def game(update, context):
     if points == 21:
         card_key = create_card_key_from_users_deck(users_deck)
         
-        send_data_to_liderboard(chat, points, card_key, user_data)
+        send_data_to_liderboard_21(chat, points, card_key, user_data)
         return ConversationHandler.END
     elif points > 21:
         games_count_db = user_data['games_count_db']
-        # add games_count in liderboard
+        # add games_count in liderboard_21
         games_count = games_count_db + 1
-        database.update_games_count_liderboard(user_id, games_count)
+        database.update_games_count_liderboard_21(chat_id, games_count)
         return ConversationHandler.END
     else:
         return 'GAME'       
@@ -238,7 +259,7 @@ def enough(update, context):
     
     card_key = create_card_key_from_users_deck(users_deck)
         
-    send_data_to_liderboard(chat, points, card_key, user_data)
+    send_data_to_liderboard_21(chat, points, card_key, user_data)
 
     return ConversationHandler.END
 
@@ -246,7 +267,7 @@ def enough(update, context):
 def liderboard(update, context):
     '''answers when button Liderboard pressed'''
     # get top 5 from database:
-    top5 = database.get_top5_liderboard()
+    top5 = database.get_top5_liderboard_21()
     # top5 - list of tuples [(first_name, points, games_count), ..]
 
     chat_id = update.effective_chat.id

@@ -32,7 +32,6 @@ def main():
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-
     twenty_one_game_handler = ConversationHandler(
             entry_points=[MessageHandler(Filters.regex('^(Play Twenty-one)$'), start_game)],
             states={
@@ -43,7 +42,6 @@ def main():
             MessageHandler(Filters.all, wrong_in_game)]
             )
     dp.add_handler(twenty_one_game_handler)
-
 
     tictac_game_handler = ConversationHandler(
             entry_points=[MessageHandler(Filters.regex('^(Play TicTacToe)$'), start_game_tictac)],
@@ -56,13 +54,11 @@ def main():
     dp.add_handler(tictac_game_handler)
 
 
-
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help_command))
-    # dp.add_handler(CommandHandler("id", add_telegram_id_in_sql))
     dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
-    dp.add_handler(MessageHandler(Filters.regex('^(Liderboard)$'), liderboard))
+    dp.add_handler(MessageHandler(Filters.regex('^(Liderboard for 21)$'), liderboard))
 
     dp.add_handler(MessageHandler(Filters.all, wrong))
     # Start the Bot

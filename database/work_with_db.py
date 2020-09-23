@@ -80,23 +80,23 @@ def get_merge_telegram_id(card_key):
     return data
 
 
-def update_table_liderboard(user_id, username, first_name,
+def update_table_liderboard_21(chat_id, username, first_name,
                     last_name, points, card_key, games_count):
-    '''inserts data in table liderboard'''
+    '''inserts data in table liderboard_21'''
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
     
-    sql_update = '''UPDATE OR IGNORE liderboard
-            SET user_id=:user_id, username=:username, first_name=:first_name,
+    sql_update = '''UPDATE OR IGNORE liderboard_21
+            SET chat_id=:chat_id, username=:username, first_name=:first_name,
             last_name=:last_name, points=:points, card_key=:card_key,
             games_count=:games_count;'''
 
-    sql_insert = '''INSERT OR IGNORE INTO liderboard
-            (user_id, username, first_name, 
+    sql_insert = '''INSERT OR IGNORE INTO liderboard_21
+            (chat_id, username, first_name, 
             last_name, points, card_key, games_count) 
             VALUES (?, ?, ?, ?, ?, ?, ?)'''
 
-    data_update = {'user_id': user_id, 
+    data_update = {'chat_id': chat_id, 
             'username': username, 
             'first_name': first_name, 
             'last_name': last_name,
@@ -104,15 +104,15 @@ def update_table_liderboard(user_id, username, first_name,
             'card_key': card_key, 
             'games_count': games_count}
 
-    data_insert = (user_id, username, first_name, last_name, 
+    data_insert = (chat_id, username, first_name, last_name, 
                     points, card_key, games_count)
 
     try:
         cursor.execute(sql_update, data_update)
     except sqlite3.IntegrityError as e:
-        logging.exception(f'Impossible to update table liderboard: {e}')
+        logging.exception(f'Impossible to update table liderboard_21: {e}')
     except sqlite3.OperationalError as e:
-        logging.exception(f'Impossible to update table liderboard. UPDATE sintax is wrong: {e}')
+        logging.exception(f'Impossible to update table liderboard_21. UPDATE sintax is wrong: {e}')
     else:
         # save the data in the db
         conn.commit()
@@ -120,74 +120,76 @@ def update_table_liderboard(user_id, username, first_name,
     try:
         cursor.execute(sql_insert, data_insert)
     except sqlite3.IntegrityError as e:
-        logging.exception(f'Impossible to insert data into the table liderboard: {e}')
+        logging.exception(f'Impossible to insert data into the table liderboard_21: {e}')
     except sqlite3.OperationalError:
-        logging.exception(f'Impossible to insert into table liderboard. INSERT sintax is wrong: {e}')
+        logging.exception(f'Impossible to insert into table liderboard_21. INSERT sintax is wrong: {e}')
     else:
         # save the data in the db
         conn.commit()
         conn.close()
     
 
-def get_points_and_games_count_liderboard(user_id):
+def get_points_and_games_count_liderboard_21(chat_id):
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
 
-    sql = 'SELECT points, games_count FROM liderboard WHERE user_id=:user_id'
+    sql = 'SELECT points, games_count FROM liderboard_21 WHERE chat_id=:chat_id'
     try:
-        cursor.execute(sql, {'user_id': user_id})
+        cursor.execute(sql, {'chat_id': chat_id})
     except sqlite3.ProgrammingError as e:
-        logging.exception(f'Impossible to get points and games_count from table liderboard: {e}')
+        logging.exception(f'Impossible to get points and games_count from table liderboard_21: {e}')
     data = cursor.fetchone()
     conn.close()
     return data    
 
-
-def insert_start_data_liderboard(user_id, username, first_name, last_name):
-    '''first insert data about user in table liderboard'''
+# TODO: ОТРЕДАКТИРОВАТЬ!
+def insert_start_data_liderboard_21(chat_id, username, first_name, last_name):
+    '''first insert data about user in table liderboard_21'''
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
-    sql = '''INSERT  INTO liderboard
-            (user_id, username, first_name, last_name, points, card_key, games_count)
+    sql = '''INSERT  INTO liderboard_21
+            (chat_id, username, first_name, last_name, points, card_key, games_count)
             VALUES(?, ?, ?, ?, ?, ?, ?)'''
-    points = 1
-    card_key = 'start'
-    games_count = 1
-    data = (user_id, username, first_name, last_name, points, card_key, games_count)
+    points = 0
+    card_key = ''
+    games_count = 0
+    data = (chat_id, username, first_name, last_name, points, card_key, games_count)
     try:
         cursor.execute(sql, data)
     # except sqlite3.IntegrityError:
     except sqlite3.ProgrammingError as e:
-        logging.exception(f'Impossible to insert data into the table liderboard(start_data): {e}')
+        logging.exception(f'Impossible to insert data into the table liderboard_21(start_data): {e}')
+    except sqlite3.IntegrityError:
+        logging.exception(f'Impossible to insert data into the table liderboard_21(start_data): {data}')
     conn.commit()
     conn.close()
 
 
-def update_games_count_liderboard(user_id, games_count):
+def update_games_count_liderboard_21(chat_id, games_count):
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
-    sql = '''UPDATE liderboard
+    sql = '''UPDATE liderboard_21
              SET games_count = ? 
-             WHERE user_id = ?'''
+             WHERE chat_id = ?'''
 
     try:
         # try to update telegram_id
-        cursor.execute(sql, (games_count, user_id))
+        cursor.execute(sql, (games_count, chat_id))
         # check if telegram_id was updated
         if cursor.rowcount < 1:
             logging.warning('games_count was not updated')
         else:
             conn.commit()
     except sqlite3.IntegrityError as e:
-        logging.exception(f'Impossible to update games_count table liderboard: {e}')
+        logging.exception(f'Impossible to update games_count table liderboard_21: {e}')
     conn.close()
 
 
-def get_top5_liderboard():
+def get_top5_liderboard_21():
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
     sql = '''SELECT first_name, points, games_count
-                FROM liderboard 
+                FROM liderboard_21 
                 ORDER BY points DESC, games_count DESC
                 LIMIT 5;
                 '''

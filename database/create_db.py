@@ -56,6 +56,7 @@ def create_table_liderboard_21(conn):
             username VARCHAR(50) UNIQUE,
             first_name VARCHAR(50),
             last_name VARCHAR(50),
+            nickname VARCHAR(20),
             points INTEGER NOT NULL CHECK(0 <= points <=21),
             card_key VARCHAR(200) NOT NULL,
             games_count INTEGER NOT NULL,
@@ -82,6 +83,26 @@ def create_trigger_liderboard_21():
             WHEN NEW.update_time <= OLD.update_time  
             BEGIN  
             update liderboard_21 set update_time=CURRENT_TIMESTAMP where id=OLD.id;  
+            END'''
+    try:
+        cursor.execute(sql)
+        logging.info('Trigger for table liderboard_21 created successfully.')
+    except sqlite3.OperationalError as e:
+        logging.exception(f'Impossible to create a trigger for liderboard_21: {e}')
+    
+    conn.commit()
+    conn.close()
+
+def create_trigger_liderboard_21_count():
+    '''create trigger update_time in table liderboard_21'''
+    conn = sqlite3.connect('deck.db')
+    cursor = conn.cursor()
+    sql = '''CREATE TRIGGER IF NOT EXISTS t_UpdateGamesCount  
+            AFTER   
+            UPDATE OF win_games_count, lose_games_count
+            ON liderboard_21 
+            BEGIN  
+            update liderboard_21 set games_count=OLD.games_count+1 where id=OLD.id;  
             END'''
     try:
         cursor.execute(sql)
@@ -135,11 +156,18 @@ def update_table_deck(conn):
             logging.warning(f'Table deck updated successfully with {card_key}')
 
 
-
+# TODO: not needed. 
 def chage_table_liderboard():
     conn = sqlite3.connect('deck.db')
     cursor = conn.cursor()
-    sql = 'AlTER TABLE liderboard_22 RENAME TO liderboard_21'
+    # sql = 'AlTER TABLE liderboard_22 RENAME TO liderboard_21'
+
+    # sql = 'DROP TABLE liderboard_21'
+    sql = '''UPDATE liderboard_21
+            SET win_games_count = 1,
+            lose_games_count = 2
+            WHERE chat_id = 91343042
+        '''
 
     cursor.execute(sql)
     conn.commit()
@@ -167,8 +195,10 @@ def main():
     # close connection
     conn.close()
 
-    # create trigger
+    # create triggers
     create_trigger_liderboard_21()
+
+    create_trigger_liderboard_21_count()
 
     logging.info('Creating database is finished')
 

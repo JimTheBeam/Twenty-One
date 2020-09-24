@@ -13,11 +13,17 @@ def get_all_data():
     cursor = conn.cursor()
     
     # get data from database:
-    sql = 'SELECT * FROM deck'
-    cursor.execute(sql)
+    sql = 'SELECT id, file_path, card_key, points FROM deck'
+
+    try:
+        cursor.execute(sql)
+    except sqlite3.ProgrammingError as e:
+        logging.exception(f'Impossible to get deck from database: {e}')
+    except sqlite3.OperationalError as e:
+        logging.exception(f'Impossible to get deck from database: {e}')
     data = cursor.fetchall()
     # data - list of tuple:
-    # [(id, file_path, telegram_id, card_key, create_time), (,,),(,,)]
+    # [(id, file_path, card_key, points), (,,),(,,)]
 
     # close connection to database
     conn.close
@@ -27,16 +33,14 @@ def get_all_data():
 # TODO: функция, которая конвертирует данные из базы в словарь
 def convert_deck_in_dict(deck):
     # deck - list of tuple:
-    # [(id, file_path, telegram_id, card_key, create_time), (,,),(,,)]
+    # [(id, file_path, card_key, points), (,,),(,,)]
     deck_dict = {}
     # create new dict:
     # {id: {file_path: value, telegram_id: value, card_key: value, create_time: value}}
     for item in deck:
         deck_dict[item[0]] = {'file_path': item[1],
-                      'telegram_id': item[2],
-                      'card_key': item[3],
-                      'points': item[4],
-                      'create_time': item[5]}
+                      'card_key': item[2],
+                      'points': item[3]}
     return deck_dict
 
 
@@ -80,20 +84,25 @@ def get_merge_telegram_id(card_key):
     return data
 
 
+# TODO: УБРАТЬ GAMES_COUNT
 def update_table_liderboard_21(chat_id, username, first_name,
-                    last_name, points, card_key, games_count):
+                    last_name, points, card_key, count, number_count):
     '''inserts data in table liderboard_21'''
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
-    
-    sql_update = '''UPDATE OR IGNORE liderboard_21
-            SET chat_id=:chat_id, username=:username, first_name=:first_name,
-            last_name=:last_name, points=:points, card_key=:card_key,
-            games_count=:games_count;'''
+    below_21_games_count = number_count
+    print('count:', count)
+    print('number_count:', number_count)
+    sql_update = f'''UPDATE OR IGNORE liderboard_21
+            SET chat_id=:chat_id, username=:username, first_name=:first_name, 
+            last_name=:last_name, points=:points, card_key=:card_key, 
+            {count}=:{count};'''
 
-    sql_insert = '''INSERT OR IGNORE INTO liderboard_21
+    print(sql_update)
+
+    sql_insert = f'''INSERT OR IGNORE INTO liderboard_21
             (chat_id, username, first_name, 
-            last_name, points, card_key, games_count) 
+            last_name, points, card_key,{count}) 
             VALUES (?, ?, ?, ?, ?, ?, ?)'''
 
     data_update = {'chat_id': chat_id, 
@@ -102,10 +111,12 @@ def update_table_liderboard_21(chat_id, username, first_name,
             'last_name': last_name,
             'points': points, 
             'card_key': card_key, 
-            'games_count': games_count}
+            count: number_count}
+
+    print(data_update)
 
     data_insert = (chat_id, username, first_name, last_name, 
-                    points, card_key, games_count)
+                    points, card_key, number_count)
 
     try:
         cursor.execute(sql_update, data_update)
@@ -133,7 +144,9 @@ def get_points_and_games_count_liderboard_21(chat_id):
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
 
-    sql = 'SELECT points, games_count FROM liderboard_21 WHERE chat_id=:chat_id'
+    sql = '''SELECT points, games_count, win_games_count, 
+            lose_games_count, below_21_games_count 
+            FROM liderboard_21 WHERE chat_id=:chat_id'''
     try:
         cursor.execute(sql, {'chat_id': chat_id})
     except sqlite3.ProgrammingError as e:
@@ -142,18 +155,18 @@ def get_points_and_games_count_liderboard_21(chat_id):
     conn.close()
     return data    
 
+
 # TODO: ОТРЕДАКТИРОВАТЬ!
-def insert_start_data_liderboard_21(chat_id, username, first_name, last_name):
+def insert_start_data_liderboard_21(chat_id, username, first_name, 
+                                last_name, points=0, games_count=0):
     '''first insert data about user in table liderboard_21'''
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
     sql = '''INSERT  INTO liderboard_21
-            (chat_id, username, first_name, last_name, points, card_key, games_count)
-            VALUES(?, ?, ?, ?, ?, ?, ?)'''
-    points = 0
-    card_key = ''
-    games_count = 0
-    data = (chat_id, username, first_name, last_name, points, card_key, games_count)
+            (chat_id, username, first_name, last_name, points, games_count)
+            VALUES(?, ?, ?, ?, ?, ?)'''
+
+    data = (chat_id, username, first_name, last_name, points, games_count)
     try:
         cursor.execute(sql, data)
     # except sqlite3.IntegrityError:

@@ -122,6 +122,7 @@ def update_table_deck(conn):
         'INSERT OR REPLACE INTO deck (file_path, card_key, points)'
         'VALUES (?, ?, ?)')
 
+    # TODO: EXCEPTIONS!!!
     # get list of file names in the directory /pictures: 
     # ['pictures/Q spade', 'pictures/6 club', ....]
     files = os.listdir('pictures/')

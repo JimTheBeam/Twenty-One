@@ -41,24 +41,49 @@ def keyboard_check_points(points):
     return keyboard
 
 
-def send_data_to_liderboard_21(chat, points, card_key, user_data):
-    '''add data in table liderboard_21'''
+def send_data_to_liderboard_21(chat, points, card_key, user_data, count, number_count):
+    '''add data in table liderboard_21
+    :count: str. can be win_games_count/lose_games_count/below_21_games_count
+    :number_count: number of points for parameter :count:'''
     chat_id = chat['id']
-
-    games_count = user_data['games_count_db'] + 1
-    points_db = user_data['points_db']
     
     username = chat['username']
     first_name = chat['first_name']
     last_name = chat['last_name']
 
-    # check if points in db are higher 
-    if points_db > points:
-        points = points_db
-
     # insert new data in table liderboard_21
     database.update_table_liderboard_21(chat_id, username, first_name,
-                            last_name, points, card_key, games_count)
+                            last_name, points, card_key, count, number_count)
+
+
+def convert_games_count(all_games_count):
+    # all_games_count - tuple:
+    # (points, games_count, win_games_count, lose_games_count, below_21_games_count)
+    # any arg can be none
+    if all_games_count[1] == None:
+        games_count = 0
+    else: games_count = all_games_count[1]
+
+    if all_games_count[2] == None:
+        win_games_count = 0
+    else: win_games_count = all_games_count[2]
+
+    if all_games_count[3] == None:
+        lose_games_count = 0
+    else: lose_games_count = all_games_count[3]
+
+    if all_games_count[4] == None:
+        below_21_games_count = 0
+    else: below_21_games_count = all_games_count[4]
+
+    count = dict({
+            'games_count': games_count,
+            'win_games_count': win_games_count,
+            'lose_games_count': lose_games_count,
+            'below_21_games_count': below_21_games_count
+            })
+    return count
+
 
 
 def game_logic(update, context):
@@ -129,60 +154,42 @@ def game_logic(update, context):
 
 
 def start_game(update, context):
-    logging.info('game started')
+    logging.info('game 21 started')
     # get deck from database:
     deck = database.convert_deck_in_dict(database.get_all_data())
     
     # chat info about user
-    # chat = update.message['chat']
     chat = update.message.chat
 
-
-    # TODO: ПРОВЕРИТЬ РАБОТАЕТ ЛИ ЭТО
-    print('update:')
-    print(update)
-    print(type(update))
-    print()
-
-    user = update.effective_user
-    print('user: ')
-    print(user)
-    print()
-    # cards in user's hands:
     users_deck = {}
 
     # get data about user from message:
     chat_id = chat['id']
-    print("chat_id: ", chat_id)
     username = chat['username']
     first_name = chat['first_name']
     last_name = chat['last_name']
 
-
-
-    username = ''
-    first_name = ''
-
-
-
     # try to get points and games_count from liderboard_21
     data = database.get_points_and_games_count_liderboard_21(chat_id)
+    print(data)
     # data = (points, games_count)
     if data == None:
         # insert data about new user in database liderboard_21
         database.insert_start_data_liderboard_21(chat_id, 
                 username, first_name, last_name)
         points_db = 0
-        games_count_db = 0
+        all_games_count_db = convert_games_count((0,0,0,0,0))
     else:
-        points_db, games_count_db = data
+        # TODO: написать словарь который превращает tuple into dict
+        points_db = data[0]
+        all_games_count_db = convert_games_count(data)
 
     # user_data is dict. It's empty here
     user_data = context.user_data
 
     # insert points_db and games_count in user_data:
     user_data['points_db'] = points_db
-    user_data['games_count_db'] = games_count_db
+    user_data['all_games_count_db'] = all_games_count_db
     
     # add cards in users_deck
     for _ in range(2):
@@ -195,16 +202,20 @@ def start_game(update, context):
     # main func of the game:
     points = game_logic(update, context)
 
+    card_key = create_card_key_from_users_deck(users_deck)
     # check if points are more than 21:
     if points == 21:
-        card_key = create_card_key_from_users_deck(users_deck)
+        win_games_count = all_games_count_db['win_games_count'] + 1
 
-        send_data_to_liderboard_21(chat, points, card_key, user_data)
+        send_data_to_liderboard_21(chat, points, card_key, user_data, 
+                                    'win_games_count', win_games_count)
         return ConversationHandler.END
     elif points > 21:
         # add games_count in liderboard_21
-        games_count = games_count_db + 1
-        database.update_games_count_liderboard_21(chat_id, games_count)
+        games_count = all_games_count_db['lose_games_count'] + 1
+
+        send_data_to_liderboard_21(chat,points_db, card_key, user_data,
+                                    'lose_games_count', games_count)
         return ConversationHandler.END
     else:
         return 'GAME'
@@ -225,20 +236,24 @@ def game(update, context):
     # main func of the game:
     points = game_logic(update, context)
 
+    card_key = create_card_key_from_users_deck(users_deck)
     # check if points are more than 21:
     if points == 21:
-        card_key = create_card_key_from_users_deck(users_deck)
+        win_games_count = user_data['all_games_count_db']['win_games_count'] + 1
         
-        send_data_to_liderboard_21(chat, points, card_key, user_data)
+        send_data_to_liderboard_21(chat, points, card_key, user_data,
+                                    'win_games_count', win_games_count)
         return ConversationHandler.END
     elif points > 21:
-        games_count_db = user_data['games_count_db']
         # add games_count in liderboard_21
-        games_count = games_count_db + 1
-        database.update_games_count_liderboard_21(chat_id, games_count)
+        lose_games_count = user_data['all_games_count_db']['lose_games_count'] + 1
+        points_db = user_data['points_db']
+
+        send_data_to_liderboard_21(chat, points_db, card_key, user_data,
+                                    'lose_games_count', lose_games_count)
         return ConversationHandler.END
     else:
-        return 'GAME'       
+        return 'GAME'   
 
 
 # отрабатывает когда нажата кнопка enough
@@ -258,8 +273,11 @@ def enough(update, context):
                     text=text, reply_markup=my_keyboard())
     
     card_key = create_card_key_from_users_deck(users_deck)
-        
-    send_data_to_liderboard_21(chat, points, card_key, user_data)
+    
+    below_21_games_count = user_data['all_games_count_db']['below_21_games_count'] + 1
+
+    send_data_to_liderboard_21(chat, points, card_key, user_data,
+                 'below_21_games_count', below_21_games_count)
 
     return ConversationHandler.END
 

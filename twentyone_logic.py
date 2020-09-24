@@ -171,8 +171,7 @@ def start_game(update, context):
 
     # try to get points and games_count from liderboard_21
     data = database.get_points_and_games_count_liderboard_21(chat_id)
-    print(data)
-    # data = (points, games_count)
+    # data = (points, games_count, win_games_count, lose_games_count, below_21_games_count)
     if data == None:
         # insert data about new user in database liderboard_21
         database.insert_start_data_liderboard_21(chat_id, 
@@ -180,7 +179,6 @@ def start_game(update, context):
         points_db = 0
         all_games_count_db = convert_games_count((0,0,0,0,0))
     else:
-        # TODO: написать словарь который превращает tuple into dict
         points_db = data[0]
         all_games_count_db = convert_games_count(data)
 
@@ -228,8 +226,7 @@ def game(update, context):
     deck = user_data['deck']
     users_deck = user_data['users_deck']
 
-    chat = update.message['chat']
-    chat_id = chat['id']
+    chat = update.message.chat
     # add card in users_deck
     users_deck = add_newcard(users_deck, deck) 
 
@@ -276,6 +273,10 @@ def enough(update, context):
     
     below_21_games_count = user_data['all_games_count_db']['below_21_games_count'] + 1
 
+    points_db = user_data['points_db']
+    if points_db > points:
+        points = points_db
+
     send_data_to_liderboard_21(chat, points, card_key, user_data,
                  'below_21_games_count', below_21_games_count)
 
@@ -283,10 +284,11 @@ def enough(update, context):
 
 
 def liderboard(update, context):
-    '''answers when button Liderboard pressed'''
+    '''answers when button Liderboard_21 pressed'''
     # get top 5 from database:
     top5 = database.get_top5_liderboard_21()
-    # top5 - list of tuples [(first_name, points, games_count), ..]
+    # top5 - list of tuples [(username, first_name, nickname, points, games_count,
+    #                        win_games_count, lose_games_count, below_21_games_count), (..),..]
 
     chat_id = update.effective_chat.id
 
@@ -296,11 +298,32 @@ def liderboard(update, context):
         n = 1
         text_lider = ''
         for i in top5:
-            first_name = i[0]
-            points = i[1]
-            games_count = i[2]
-            text_line = f'{n}. {first_name} has {points} max points. Played {games_count} times\n'
+            name = check_liderboard_name(username=i[0], first_name=i[1], nickname=i[2])
+            if name == None:
+                continue
+            points = i[3]
+            win_games_count = i[5]
+            if win_games_count == None:
+                win_games_count = 0
+
+            games_count = i[4]
+            if games_count == None:
+                games_count = 0
+            text_line = f'{n}. {name} has {points} max points. Played {games_count} times. '\
+                    f'Won {win_games_count} times\n\n'
             text_lider += text_line
+            if n == 5:
+                break
             n += 1
         text = 'TOP PLAYERS:\n' + text_lider
         context.bot.send_message(chat_id=chat_id, text=text)
+
+
+def check_liderboard_name(username, first_name, nickname):
+    if first_name != None: return first_name
+    else:
+        if username != None:
+            return username
+        else:
+            if nickname != None: return nickname
+            else: return None

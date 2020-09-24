@@ -12,7 +12,8 @@ from keyboard import my_keyboard, game_keyboard
 
 from twentyone_logic import start_game, game, enough, liderboard
 
-from bot_func import start, help_command, wrong, wrong_in_game, stop
+from bot_func import start, help_command, wrong, wrong_in_game, stop,\
+                     add_nickname, cancel_nickname, wrong_nickname
 
 from tictac.tictac_game_logic import start_game_tictac, game_tictac 
 
@@ -53,6 +54,17 @@ def main():
             )
     dp.add_handler(tictac_game_handler)
 
+    
+    start_handler = ConversationHandler(
+            entry_points=[CommandHandler('start', start)],
+            states={
+                'NICKNAME' : [MessageHandler(Filters.text, add_nickname)]
+            },
+            fallbacks=[MessageHandler(Filters.regex('^(cancel)$'), cancel_nickname),
+                MessageHandler(Filters.all, wrong_nickname)
+            ]
+    )
+    dp.add_handler(start_handler)
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))

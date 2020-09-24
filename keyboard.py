@@ -15,4 +15,9 @@ def game_keyboard():
     return keyboard
 
 
+def start_keyboard():
+    keyboard = ReplyKeyboardMarkup([['cancel']],
+                                    resize_keyboard=True,
+                                    one_time_keyboard=True)
+    return keyboard
 

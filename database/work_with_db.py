@@ -160,7 +160,7 @@ def insert_start_data_liderboard_21(chat_id, username, first_name,
     cursor = conn.cursor()
     sql = '''INSERT  INTO liderboard_21
             (chat_id, username, first_name, last_name, points, games_count, nickname)
-            VALUES(?, ?, ?, ?, ?, ?)'''
+            VALUES(?, ?, ?, ?, ?, ?, ?)'''
 
     data = (chat_id, username, first_name, last_name, points, games_count, nickname)
     try:

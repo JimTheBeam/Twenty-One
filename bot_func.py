@@ -30,7 +30,7 @@ def start(update, context):
 
 def add_nickname(update, context):
     chat = update.message.chat
-    nickname = chat.text
+    nickname = update.message.text
     chat_id = chat.id
     username = chat.username
     first_name = chat.first_name

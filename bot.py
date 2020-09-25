@@ -32,7 +32,7 @@ def main():
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
-
+    # GAME Twenty-one
     twenty_one_game_handler = ConversationHandler(
             entry_points=[MessageHandler(Filters.regex('^(Play Twenty-one)$'), start_game)],
             states={
@@ -44,6 +44,7 @@ def main():
             )
     dp.add_handler(twenty_one_game_handler)
 
+    # GAME TicTacToe
     tictac_game_handler = ConversationHandler(
             entry_points=[MessageHandler(Filters.regex('^(Play TicTacToe)$'), start_game_tictac)],
             states={
@@ -69,6 +70,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help_command))
+    dp.add_handler(MessageHandler(Filters.regex('^(Play TicTacToe)$'), start_game_tictac))
     dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
     dp.add_handler(MessageHandler(Filters.regex('^(Liderboard for 21)$'), liderboard))
 

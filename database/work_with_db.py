@@ -152,7 +152,7 @@ def get_points_and_games_count_liderboard_21(chat_id):
     return data    
 
 
-# TODO: ОТРЕДАКТИРОВАТЬ!
+
 def insert_start_data_liderboard_21(chat_id, username, first_name, 
                                 last_name, nickname=None, points=0, games_count=0):
     '''first insert data about user in table liderboard_21'''

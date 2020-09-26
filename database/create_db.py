@@ -50,7 +50,7 @@ def create_table_liderboard_21(conn):
     '''create a table liderboard_21'''
     try:
         conn.execute('''
-            CREATE TABLE  IF NOT EXISTS liderboard_21 (
+            CREATE TABLE IF NOT EXISTS liderboard_21 (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             chat_id VARCHAR(50) NOT NULL UNIQUE,
             username VARCHAR(50) UNIQUE,
@@ -59,10 +59,10 @@ def create_table_liderboard_21(conn):
             nickname VARCHAR(20),
             points INTEGER NOT NULL CHECK(0 <= points <=21),
             card_key VARCHAR(200),
-            games_count INTEGER NOT NULL,
-            win_games_count INTEGER,
-            lose_games_count INTEGER,
-            below_21_games_count INTEGER,
+            games_count INTEGER NOT NULL CHECK(games_count >= 0),
+            win_games_count INTEGER CHECK(win_games_count >= 0),
+            lose_games_count INTEGER CHECK(lose_games_count >= 0),
+            below_21_games_count INTEGER CHECK(below_21_games_count >= 0),
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
             update_time DATETIME DEFAULT CURRENT_TIMESTAMP
             );''')
@@ -70,6 +70,53 @@ def create_table_liderboard_21(conn):
     except sqlite3.OperationalError:
         logging.exception('Impossible to create table liderboard_21')
     conn.commit()
+
+
+def create_table_liderboard_tictac():
+    conn = sqlite3.connect('deck.db')
+    cursor = conn.cursor()
+    sql = '''CREATE TABLE IF NOT EXISTS liderboard_tictac(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        chat_id VARCHAR(50) NOT NULL UNIQUE,
+        username VARCHAR(50) UNIQUE,
+        first_name VARCHAR(50),
+        last_name VARCHAR(50),
+        nickname VARCHAR(20),
+        win_count INTEGER CHECK(win_count >= 0),
+        lose_count INTEGER CHECK(win_count >= 0),
+        draw_count INTEGER CHECK(win_count >= 0),
+        games_count INTEGER CHECK(win_count >= 0),
+        create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+        update_time DATETIME DEFAULT CURRENT_TIMESTAMP
+    );'''
+    try:
+        cursor.execute(sql)
+        logging.warning('Table liderboard_tictac created successfully')
+    except sqlite3.OperationalError:
+        logging.exception('Impossible to create table liderboard_tictac')
+    conn.commit()
+    conn.close()
+
+
+def create_trigger_liderboard_tictac_count():
+    '''create trigger update_time in table liderboard_tictac'''
+    conn = sqlite3.connect('deck.db')
+    cursor = conn.cursor()
+    sql = '''CREATE TRIGGER IF NOT EXISTS t_UpdateTictacGamesCount  
+            AFTER   
+            UPDATE OF win_count, lose_count, draw_count
+            ON liderboard_tictac 
+            BEGIN  
+            update liderboard_tictac set games_count=OLD.games_count+1 where id=OLD.id;  
+            END'''
+    try:
+        cursor.execute(sql)
+        logging.info('Trigger for table liderboard_tictac created successfully.')
+    except sqlite3.OperationalError as e:
+        logging.exception(f'Impossible to create a trigger for liderboard_tictac: {e}')
+    conn.commit()
+    conn.close()
+
 
 
 def create_trigger_liderboard_21():
@@ -196,7 +243,7 @@ def main():
     # Create a table merged_photo:
     create_table_merged_photo(conn)
 
-    # Create a table liderboard:
+    # Create a table liderboard_21:
     create_table_liderboard_21(conn)
 
     # close connection
@@ -206,6 +253,10 @@ def main():
     create_trigger_liderboard_21()
 
     create_trigger_liderboard_21_count()
+
+    # create table liderboard_tictac
+    create_table_liderboard_tictac()
+    create_trigger_liderboard_tictac_count()
 
     logging.info('Creating database is finished')
 

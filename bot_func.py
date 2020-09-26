@@ -42,6 +42,7 @@ def add_nickname(update, context):
     text = f'Your nickname {nickname} was added into the base. '\
          'You\'ll be able to see yourself in the liderboard now!'
     update.message.reply_text(text=text,reply_markup=my_keyboard())
+    return ConversationHandler.END
 
 
 def cancel_nickname(update, context):
@@ -49,6 +50,7 @@ def cancel_nickname(update, context):
     logging.info(f'user with chat_id: {chat.id} don\'t want enter nickname')
     text = 'Sadly :-( \n If you decide to chage your mind send me command /start'
     update.message.reply_text(text=text, reply_markup=my_keyboard())
+    return ConversationHandler.END
 
 
 def wrong_nickname(update, context):

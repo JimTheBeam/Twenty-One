@@ -158,15 +158,15 @@ def insert_start_data_liderboard_21(chat_id, username, first_name,
     '''first insert data about user in table liderboard_21'''
     conn = sqlite3.connect('database/deck.db')
     cursor = conn.cursor()
-    sql = '''INSERT  INTO liderboard_21
+    sql = '''INSERT OR IGNORE INTO liderboard_21
             (chat_id, username, first_name, last_name, points, games_count, nickname)
             VALUES(?, ?, ?, ?, ?, ?, ?)'''
 
     data = (chat_id, username, first_name, last_name, points, games_count, nickname)
     try:
         cursor.execute(sql, data)
-    except sqlite3.ProgrammingError as e:
-        logging.exception(f'Impossible to insert data into the table liderboard_21(start_data): {e}')
+    except sqlite3.ProgrammingError:
+        logging.exception(f'Impossible to insert data into the table liderboard_21(start_data): {data}')
     except sqlite3.IntegrityError:
         logging.exception(f'Impossible to insert data into the table liderboard_21(start_data): {data}')
     conn.commit()

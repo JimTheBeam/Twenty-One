@@ -18,10 +18,18 @@ def start_game_tictac(update, context):
     return 'GAME'
 
 
-# add 'O' to the fild to block user's two 'X'
-# or add 'O' to win the game
-# return list of buttons that contains 'O'
 def add_o_if_two_in_row(button, text):
+    """[add 'O' on the field to block user's two 'X'
+    or add 'O' to win the game]
+
+    Args:
+        button ([list]): [list of buttons from the game]
+        text ([str]): [can be 'text_o' or 'text_x'. 
+            It's a parameter to check if two in a row]
+
+    Returns:
+        [button]: [list of buttons with added 'O']
+    """
     lines = ((0,1,2),(3,4,5),(6,7,8),(0,3,6),(1,4,7),(2,5,8),(0,4,8),(2,4,6))
     for i in lines:
         if button[i[0]] == button[i[1]] == text or\

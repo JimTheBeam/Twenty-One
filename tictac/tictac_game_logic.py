@@ -228,18 +228,24 @@ def liderboard_tictac(update, context):
             name = check_liderboard_name(username=i[0], first_name=i[1], nickname=i[2])
             if name == None:
                 continue
+            
             lose_count = i[5]
             if lose_count == None:
                 lose_count = 0
+            lose_text = f'{lose_count} time' if lose_count == 1 else f'{lose_count} times'
+
             win_count = i[4]
             if win_count == None:
                 win_count = 0
+            win_text = f'{win_count} time' if win_count == 1 else f'{win_count} times'
 
             games_count = i[3]
             if games_count == None:
                 games_count = 0
-            text_line = f'{n}. {name} won {win_count} times, lost {lose_count} times, '\
-                    f'played {games_count} times.\n\n'
+            count_text = f'{games_count} time' if games_count == 1 else f'{games_count} times'
+            
+            text_line = f'{n}. {name} won {win_text}, lost {lose_text}, '\
+                    f'played {count_text}.\n\n'
             text_lider += text_line
             if n == 5:
                 break

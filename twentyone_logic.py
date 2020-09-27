@@ -85,7 +85,6 @@ def convert_games_count(all_games_count):
     return count
 
 
-
 def game_logic(update, context):
     # user_data is dict
     user_data = context.user_data
@@ -305,12 +304,16 @@ def liderboard(update, context):
             win_games_count = i[5]
             if win_games_count == None:
                 win_games_count = 0
+            win_text = f'{win_games_count} time' if win_games_count == 1 \
+                            else f'{win_games_count} times'
 
             games_count = i[4]
             if games_count == None:
                 games_count = 0
-            text_line = f'{n}. {name} has {points} max points. Played {games_count} times. '\
-                    f'Won {win_games_count} times\n\n'
+            count_text = f'{games_count} time' if games_count == 1 else f'{games_count} times'
+
+            text_line = f'{n}. {name} has {points} max points. Played {count_text}, '\
+                    f'won {win_text}.\n\n'
             text_lider += text_line
             if n == 5:
                 break

@@ -19,7 +19,7 @@ def start(update, context):
     if chat.first_name and chat.username == None:
         text = 'Your account don\'t have username and first name. \n'\
             'If you want to be in liderboard table send your nickname in response.\n'\
-            'If not just press "cancel" on keyboard'
+            'If not just press "cancel" on keyboard below'
         update.message.reply_text(text=text, reply_markup=start_keyboard())
         return 'NICKNAME'
     else:

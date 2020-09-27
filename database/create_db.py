@@ -83,9 +83,9 @@ def create_table_liderboard_tictac():
         last_name VARCHAR(50),
         nickname VARCHAR(20),
         win_count INTEGER CHECK(win_count >= 0),
-        lose_count INTEGER CHECK(win_count >= 0),
-        draw_count INTEGER CHECK(win_count >= 0),
-        games_count INTEGER CHECK(win_count >= 0),
+        lose_count INTEGER CHECK(lose_count >= 0),
+        draw_count INTEGER CHECK(draw_count >= 0),
+        games_count INTEGER CHECK(games_count >= 0),
         create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
         update_time DATETIME DEFAULT CURRENT_TIMESTAMP
     );'''
@@ -107,7 +107,7 @@ def create_trigger_liderboard_tictac_count():
             UPDATE OF win_count, lose_count, draw_count
             ON liderboard_tictac 
             BEGIN  
-            update liderboard_tictac set games_count=OLD.games_count+1 where id=OLD.id;  
+            UPDATE liderboard_tictac SET games_count=OLD.games_count+1 WHERE id=OLD.id;  
             END'''
     try:
         cursor.execute(sql)
@@ -117,6 +117,27 @@ def create_trigger_liderboard_tictac_count():
     conn.commit()
     conn.close()
 
+
+def create_trigger_liderboard_tictac():
+    '''create trigger update_time in table liderboard_tictac'''
+    conn = sqlite3.connect('deck.db')
+    cursor = conn.cursor()
+    sql = '''CREATE TRIGGER IF NOT EXISTS t_UpdateLastTimeTictac  
+            AFTER   
+            UPDATE  
+            ON liderboard_tictac
+            FOR EACH ROW   
+            WHEN NEW.update_time <= OLD.update_time  
+            BEGIN  
+            update liderboard_tictac set update_time=CURRENT_TIMESTAMP where id=OLD.id;  
+            END'''
+    try:
+        cursor.execute(sql)
+        logging.info('Trigger for table liderboard_tictac created successfully.')
+    except sqlite3.OperationalError as e:
+        logging.exception(f'Impossible to create a trigger for liderboard_tictac: {e}')
+    conn.commit()
+    conn.close()
 
 
 def create_trigger_liderboard_21():
@@ -143,7 +164,7 @@ def create_trigger_liderboard_21():
 
 
 def create_trigger_liderboard_21_count():
-    '''create trigger update_time in table liderboard_21'''
+    '''create trigger update_games_count in table liderboard_21'''
     conn = sqlite3.connect('deck.db')
     cursor = conn.cursor()
     sql = '''CREATE TRIGGER IF NOT EXISTS t_UpdateGamesCount  
@@ -264,4 +285,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # create_table_liderboard_tictac()
+    # create_trigger_liderboard_tictac_count()
+    # create_trigger_liderboard_tictac()
+
     # chage_table_liderboard()

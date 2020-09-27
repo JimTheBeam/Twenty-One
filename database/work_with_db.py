@@ -206,3 +206,91 @@ def get_top5_liderboard_21():
     data = cursor.fetchall()
     conn.close()
     return data
+
+
+def update_table_liderboard_tictac(chat_id, username, first_name,
+                        last_name, count, number_count):
+    '''inserts data in table liderboard_tictac
+    :count: name of column to update
+    :count: can be "win_count", lose_count, draw_count
+    :number_count: number counts of column :count:'''
+    conn = sqlite3.connect('database/deck.db')    
+    cursor = conn.cursor()
+    sql_update = f'''UPDATE OR IGNORE liderboard_tictac
+                SET chat_id=:chat_id, username=:username, first_name=:first_name,
+                last_name=:last_name, {count}=:{count};'''
+
+    sql_insert = f'''INSERT OR IGNORE INTO liderboard_tictac
+            (chat_id, username, first_name, last_name, {count})
+            VALUES (?, ?, ?, ?, ?);'''
+
+    data_update = {'chat_id': chat_id, 
+            'username': username, 
+            'first_name': first_name, 
+            'last_name': last_name, 
+            count: number_count}
+
+    data_insert = (chat_id, username, first_name, last_name, 
+                    number_count)
+
+    try:
+        cursor.execute(sql_update, data_update)
+    except sqlite3.IntegrityError as e:
+        logging.exception(f'Impossible to update table liderboard_tictac: {e}')
+    except sqlite3.OperationalError as e:
+        logging.exception(f'Impossible to update table liderboard_tictac. \
+                            UPDATE sintax is wrong: {e}')
+    else:
+        # save the data in the db
+        conn.commit()
+
+    try:
+        cursor.execute(sql_insert, data_insert)
+    except sqlite3.IntegrityError as e:
+        logging.exception(f'Impossible to insert data into the table liderboard_tictac: {e}')
+    except sqlite3.OperationalError:
+        logging.exception(f'Impossible to insert into table liderboard_tictac. \
+                        INSERT sintax is wrong: {e}')
+    else:
+        # save the data in the db
+        conn.commit()
+        conn.close()
+
+
+def get_games_count_liderboard_tictac(chat_id):
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+
+    sql = '''SELECT games_count, win_count, 
+            lose_count, draw_count 
+            FROM liderboard_tictac WHERE chat_id=:chat_id'''
+    try:
+        cursor.execute(sql, {'chat_id': chat_id})
+    except sqlite3.ProgrammingError:
+        logging.exception(f'Impossible to get points and games_count \
+            from table liderboard_tictac. chat_id: {chat_id}')
+    data = cursor.fetchone()
+    conn.close()
+    return data
+
+
+def insert_start_data_liderboard_tictac(chat_id, username, first_name, 
+                                last_name, nickname=None, games_count=0):
+    '''first insert data about user in table liderboard_tictac'''
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+    sql = '''INSERT OR IGNORE INTO liderboard_tictac
+            (chat_id, username, first_name, last_name, games_count, nickname)
+            VALUES(?, ?, ?, ?, ?, ?)'''
+
+    data = (chat_id, username, first_name, last_name, games_count, nickname)
+    try:
+        cursor.execute(sql, data)
+    except sqlite3.ProgrammingError:
+        logging.exception(f'Impossible to insert data into the table \
+                            liderboard_tictac(start_data): {data}')
+    except sqlite3.IntegrityError:
+        logging.exception(f'Impossible to insert data into the table \
+                            liderboard_tictac(start_data): {data}')
+    conn.commit()
+    conn.close()

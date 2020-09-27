@@ -1,14 +1,29 @@
 from telegram.ext import Updater, ConversationHandler
 
+from random import randint
+
 from tictac.keyboards_tictac import tictac_keyb, error_keyboard, inline_keys,\
     text_x, text_o, text_none
 
-from random import randint
+from database.work_with_db import update_table_liderboard_tictac,\
+            get_games_count_liderboard_tictac, insert_start_data_liderboard_tictac
+
 
 
 # starts the game 
 def start_game_tictac(update, context):
     user_data = context.user_data
+
+    chat = update.message.chat
+    chat_id = chat.id
+    # try to get data from liderboard_tictac:
+    data = get_games_count_liderboard_tictac(chat_id)
+    if not data:
+        username = chat.username
+        first_name = chat.first_name
+        last_name = chat.last_name
+
+        insert_start_data_liderboard_tictac(chat_id, username, first_name, last_name)
 
     user_data['buttons'] = inline_keys()
 
@@ -98,6 +113,12 @@ def game_tictac(update, context):
     query = update.callback_query
     user_data = context.user_data
 
+    chat = query.message.chat
+    chat_id = chat.id
+    username = chat.username
+    first_name = chat.first_name
+    last_name = chat.last_name
+
     # check if user_data has buttons for keyboard
     if not 'buttons' in user_data:
         user_data['buttons'] = inline_keys()
@@ -110,7 +131,7 @@ def game_tictac(update, context):
         if button[user_choice] == text_none:
             button[user_choice] = text_x
         else:
-            context.bot.edit_message_text(text='Wrong cell', chat_id=query.message.chat_id, 
+            context.bot.edit_message_text(text='Wrong cell', chat_id=chat_id, 
                 message_id=query.message.message_id,
                 reply_markup=tictac_keyb(*button))
             return 'GAME'
@@ -122,15 +143,38 @@ def game_tictac(update, context):
         pass
     else:
         context.bot.edit_message_text(text='You won!',
-                chat_id=query.message.chat_id, 
+                chat_id=chat_id, 
                 message_id=query.message.message_id)
+        # get win_count from liderboard_tictac
+        games_count = get_games_count_liderboard_tictac(chat_id)    
+        if games_count == None:
+            win_count = 1
+        else:
+            if games_count[1] == None:
+                win_count = 1
+            else:
+                win_count = games_count[1] + 1
+        # insert win_count in liderboard_tictac
+        update_table_liderboard_tictac(chat_id, username, first_name, \
+                                last_name, 'win_count', win_count)
         return ConversationHandler.END
 
     # check if fild is full:
     if not text_none in button:
         context.bot.edit_message_text(text='Draw!',
-                chat_id=query.message.chat_id, 
+                chat_id=chat_id, 
                 message_id=query.message.message_id)
+
+        games_count = get_games_count_liderboard_tictac(chat_id)
+        if games_count == None:
+            draw_count = 1
+        else:
+            if games_count[3] == None:
+                draw_count = 1
+            else:
+                draw_count = games_count[3] + 1
+        update_table_liderboard_tictac(chat_id, username, first_name, \
+                        last_name, 'draw_count', draw_count)
         return ConversationHandler.END
 
     # bot add 'O' to keyboard
@@ -142,11 +186,22 @@ def game_tictac(update, context):
         pass
     else:
         context.bot.edit_message_text(text='Bot won!',
-                chat_id=query.message.chat_id, 
+                chat_id=chat_id, 
                 message_id=query.message.message_id)
+
+        games_count = get_games_count_liderboard_tictac(chat_id)
+        if games_count == None:
+            lose_count = 1
+        else:
+            if games_count[2] == None:
+                lose_count = 1
+            else:
+                lose_count = games_count[2] + 1
+        update_table_liderboard_tictac(chat_id, username, first_name, \
+                    last_name, 'lose_count', lose_count)
         return ConversationHandler.END
 
-    context.bot.edit_message_text(text='Your turn', chat_id=query.message.chat_id, 
+    context.bot.edit_message_text(text='Your turn', chat_id=chat_id, 
                 message_id=query.message.message_id,
                 reply_markup=keyboard)
     return 'GAME'

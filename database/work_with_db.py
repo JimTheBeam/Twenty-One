@@ -294,3 +294,18 @@ def insert_start_data_liderboard_tictac(chat_id, username, first_name,
                             liderboard_tictac(start_data): {data}')
     conn.commit()
     conn.close()
+
+
+def get_top10_liderboard_tictac():
+    conn = sqlite3.connect('database/deck.db')
+    cursor = conn.cursor()
+    sql = '''SELECT username, first_name, nickname, games_count, 
+                win_count, lose_count, draw_count
+                FROM liderboard_tictac 
+                ORDER BY win_count DESC, games_count ASC
+                LIMIT 10;
+                '''
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    conn.close()
+    return data

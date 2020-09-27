@@ -74,7 +74,7 @@ Jacks valued at 2,
 Queens valued at 3,
 Kings valued at 4,
 Aces valued at 11'''
-    update.message.reply_text(text)
+    update.message.reply_text(text, reply_markup=my_keyboard())
 
 
 def wrong_in_game(update, context):

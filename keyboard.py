@@ -4,7 +4,8 @@ from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 # keyboard:
 def my_keyboard():
     keyboard = ReplyKeyboardMarkup([['Play Twenty-one', 'Play TicTacToe'], 
-                                    ['Help!', 'Liderboard for 21']], 
+                                    ['Liderboard for 21', 'Liderboard for TicTacToe'],
+                                    ['Help!']], 
                                     resize_keyboard=True)
     return keyboard
 

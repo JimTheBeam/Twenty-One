@@ -15,7 +15,7 @@ from twentyone_logic import start_game, game, enough, liderboard
 from bot_func import start, help_command, wrong, wrong_in_game, stop,\
                      add_nickname, cancel_nickname, wrong_nickname
 
-from tictac.tictac_game_logic import start_game_tictac, game_tictac 
+from tictac.tictac_game_logic import start_game_tictac, game_tictac, liderboard_tictac
 
 
 # Enable logging
@@ -73,6 +73,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex('^(Play TicTacToe)$'), start_game_tictac))
     dp.add_handler(MessageHandler(Filters.regex('^(Help!)$'), help_command))
     dp.add_handler(MessageHandler(Filters.regex('^(Liderboard for 21)$'), liderboard))
+    dp.add_handler(MessageHandler(Filters.regex('^(Liderboard for TicTacToe)$'), liderboard_tictac))
 
     dp.add_handler(MessageHandler(Filters.all, wrong))
     # Start the Bot
@@ -83,4 +84,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-__version__ = '1.0.3'
+__version__ = '1.0.5'

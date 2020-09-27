@@ -293,7 +293,7 @@ def liderboard(update, context):
     chat_id = update.effective_chat.id
 
     if top5 == None:
-        text = 'There are no playes yet.\nPlay and be the first!'
+        text = 'There are no players yet.\nPlay and be the first!'
     else:
         n = 1
         text_lider = ''
@@ -316,7 +316,7 @@ def liderboard(update, context):
                 break
             n += 1
         text = 'TOP PLAYERS:\n' + text_lider
-        context.bot.send_message(chat_id=chat_id, text=text)
+        context.bot.send_message(chat_id=chat_id, text=text, reply_markup=my_keyboard())
 
 
 def check_liderboard_name(username, first_name, nickname):

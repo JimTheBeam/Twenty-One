@@ -6,7 +6,12 @@ from tictac.keyboards_tictac import tictac_keyb, error_keyboard, inline_keys,\
     text_x, text_o, text_none
 
 from database.work_with_db import update_table_liderboard_tictac,\
-            get_games_count_liderboard_tictac, insert_start_data_liderboard_tictac
+            get_games_count_liderboard_tictac, insert_start_data_liderboard_tictac,\
+            get_top10_liderboard_tictac
+
+from twentyone_logic import check_liderboard_name
+
+from keyboard import my_keyboard
 
 
 
@@ -205,3 +210,41 @@ def game_tictac(update, context):
                 message_id=query.message.message_id,
                 reply_markup=keyboard)
     return 'GAME'
+
+
+def liderboard_tictac(update, context):
+    # get data from db
+    top10 = get_top10_liderboard_tictac()
+    # top10 - list of tuples [(username, first_name, nickname, games_count,
+    #                        win_count, lose_count, draw_count), (..),..]
+    chat_id = update.effective_chat.id
+
+    if top10 == None:
+        text = 'There are no players yet.\nPlay and be the first!'
+    else:
+        n = 1
+        text_lider = ''
+        for i in top10:
+            name = check_liderboard_name(username=i[0], first_name=i[1], nickname=i[2])
+            if name == None:
+                continue
+            lose_count = i[5]
+            if lose_count == None:
+                lose_count = 0
+            win_count = i[4]
+            if win_count == None:
+                win_count = 0
+
+            games_count = i[3]
+            if games_count == None:
+                games_count = 0
+            text_line = f'{n}. {name} won {win_count} times, lost {lose_count} times, '\
+                    f'played {games_count} times.\n\n'
+            text_lider += text_line
+            if n == 5:
+                break
+            n += 1
+        text = 'TOP PLAYERS:\n' + text_lider
+        context.bot.send_message(chat_id=chat_id, text=text, reply_markup=my_keyboard())
+
+

@@ -16,7 +16,7 @@ def start(update, context):
 
     # анька фикс
     chat = update.message.chat
-    if chat.first_name and chat.username == None:
+    if chat.first_name == None:
         text = 'Your account don\'t have username and first name. \n'\
             'If you want to be in liderboard table send your nickname in response.\n'\
             'If not just press "cancel" on keyboard below'

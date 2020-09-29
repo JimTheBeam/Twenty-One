@@ -24,8 +24,6 @@ def start(update, context):
         return 'NICKNAME'
     else:
         return ConversationHandler.END
-    # print(message)
-    # update.message.reply_text(text2, reply_markup=my_keyboard())
 
 
 def add_nickname(update, context):

@@ -34,7 +34,6 @@ def start_game_tictac(update, context):
 
     update.message.reply_text(text='Game started',
                          reply_markup=tictac_keyb(*user_data['buttons']))
-
     return 'GAME'
 
 
@@ -61,9 +60,18 @@ def add_o_if_two_in_row(button, text):
                     return button
 
 
-# check if there are two 'O' or 'X' in one row and one vacant place
-# return True or False
 def check_two_in_row(button, text):
+    """[check if there are two 'O' or 'X' in one row and one vacant place]
+
+    Args:
+        button ([list]): [list of buttons from the game]
+        text ([str]): [can be 'text_o' or 'text_x'. 
+            It's a parameter to check if two in a row]
+
+    Returns:
+        [bool]: [True if there are two in a row False if not]
+    """
+    
     lines = ((0,1,2),(3,4,5),(6,7,8),(0,3,6),(1,4,7),(2,5,8),(0,4,8),(2,4,6))
     for i in lines:
         if button[i[0]] == button[i[1]] == text or\
@@ -75,8 +83,15 @@ def check_two_in_row(button, text):
     return False
 
 
-# func add 'O' in game keyboard
 def add_o(button):
+    """[add 'O' in a game keyboard]
+
+    Args:
+        button ([list]): [list of buttons from the game]
+
+    Returns:
+        [list]: [list of buttons with added 'O']
+    """
     if check_two_in_row(button, text_o):
         button = add_o_if_two_in_row(button, text_o)
         return button

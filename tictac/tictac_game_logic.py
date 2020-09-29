@@ -17,6 +17,15 @@ from keyboard import my_keyboard
 
 # starts the game 
 def start_game_tictac(update, context):
+    """[]
+
+    Args:
+        update ([type]): [description]
+        context ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     user_data = context.user_data
 
     chat = update.message.chat
@@ -109,8 +118,15 @@ def add_o(button):
                     return button
 
 
-# check if user won. (3 in a row)
 def check_user_win(button):
+    """[check if user won]
+
+    Args:
+        button ([list]): [list of buttons from the game]
+
+    Returns:
+        [bool]: [True if user won False if not]
+    """
     lines = ((0,1,2),(3,4,5),(6,7,8),(0,3,6),(1,4,7),(2,5,8),(0,4,8),(2,4,6))
     for each in lines:
         if button[each[0]] == button[each[1]] == button[each[2]] == text_x:
@@ -118,8 +134,15 @@ def check_user_win(button):
     return False
 
 
-# check if bot won. (3 in a row)
 def check_bot_win(button):
+    """[Check if bot won]
+
+    Args:
+        button ([list]): [list of buttons from the game]
+
+    Returns:
+        [bool]: [True if bot won False if not]
+    """
     lines = ((0,1,2),(3,4,5),(6,7,8),(0,3,6),(1,4,7),(2,5,8),(0,4,8),(2,4,6))
     for each in lines:
         if button[each[0]] == button[each[1]] == button[each[2]] == text_o:
@@ -130,6 +153,12 @@ def check_bot_win(button):
 # main function of the game
 # catch if inline keyboard button is pressed
 def game_tictac(update, context):
+    """[main func of the game
+    catch if inline keyboard button is pressed]
+
+    Returns:
+        []: [ConversationHandler.END or state 'GAME' for ConversationHandler]
+    """
     query = update.callback_query
     user_data = context.user_data
 

@@ -2,6 +2,9 @@ from telegram.ext import Updater, ConversationHandler
 
 from random import randint
 
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
 from tictac.keyboards_tictac import tictac_keyb, error_keyboard, inline_keys,\
     text_x, text_o, text_none
 
@@ -14,17 +17,16 @@ from twentyone_logic import check_liderboard_name
 from keyboard import my_keyboard
 
 
-
 # starts the game 
 def start_game_tictac(update, context):
-    """[]
+    """[starts game]
 
     Args:
         update ([type]): [description]
         context ([type]): [description]
 
     Returns:
-        [type]: [description]
+        []: [return state "GAME" of ConversationHandler]
     """
     user_data = context.user_data
 
@@ -214,6 +216,7 @@ def game_tictac(update, context):
                 chat_id=chat_id, 
                 message_id=query.message.message_id)
 
+        # get games count from database
         games_count = get_games_count_liderboard_tictac(chat_id)
         if games_count == None:
             draw_count = 1

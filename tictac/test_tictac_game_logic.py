@@ -103,6 +103,32 @@ class Test_tictac_game_logic(unittest.TestCase):
         self.assertEqual(res, res_buttons)
 
 
+    def test9_add_o_if_two_in_row(self):
+        buttons = ['X', 'X', 'X',
+                   'X', 'X', 'O',
+                   'O', '_', 'O']
+        text = 'O'
+        res = add_o_if_two_in_row(buttons, text)
+        res_buttons = ['X', 'X', 'X',
+                       'X', 'X', 'O',
+                       'O', 'O', 'O']
+        self.assertEqual(res, res_buttons)
+
+
+    def test10_add_o_if_two_in_row(self):
+        buttons = ['O', '_', 'O',
+                   'X', 'X', 'O',
+                   'X', '_', 'O']
+        text = 'O'
+        res = add_o_if_two_in_row(buttons, text)
+        res_buttons = ['O', 'O', 'O',
+                       'X', 'X', 'O',
+                       'X', '_', 'O']
+        self.assertEqual(res, res_buttons)
+
+
+
+
 
 
 
